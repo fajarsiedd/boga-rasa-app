@@ -1,28 +1,30 @@
 <script setup>
-import { Head, usePage, router } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3'; // Hapus 'router' dan 'Link' jika tidak langsung digunakan
 
-const user = usePage().props.auth.user; // Ambil data user dari props Inertia secara global (jika sudah di setup di HandleInertiaRequests)
-
-const logout = () => {
-    router.post(route('logout')); // Asumsi ada route logout
-};
+const user = usePage().props.auth.user; // Ambil data user dari props Inertia secara global
 </script>
 
 <template>
-
     <Head title="Dashboard" />
 
-    <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-        <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">Selamat Datang di Dashboard!</h2>
-            <p v-if="user" class="text-lg text-gray-600 mb-6">Halo, <span class="font-semibold">{{ user.name }}</span>!
-                Kamu sudah login.</p>
-            <form @submit.prevent="logout">
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
-                    Logout
-                </button>
-            </form>
+    <!-- Slot untuk Judul Halaman di App Bar -->
+    <!-- Ini tetap diperlukan karena ini adalah "named slot" di AuthenticatedLayout -->
+    <!-- <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
+    </template> -->
+
+    <!-- Konten Utama Dashboard -->
+    <!-- Tidak perlu lagi dibungkus AuthenticatedLayout di sini -->
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-2xl font-bold mb-2">Selamat Datang di Dashboard!</h3>
+                    <p v-if="user" class="text-lg text-gray-600">Halo, <span class="font-semibold">{{ user.name }}</span> (Role: {{ user.role }})! Kamu sudah login.</p>
+                    <p class="mt-4">Ini adalah halaman dashboard utama aplikasi internal kamu.</p>
+                    <p class="mt-2">Navigasi menggunakan sidebar di samping kiri.</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>

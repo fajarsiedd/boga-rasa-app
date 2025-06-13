@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([            
-            'redirect.auth.guest' => \App\Http\Middleware\RedirectIfAuthenticatedOrGuest::class,
+            'redirect.auth.guest' => \App\Http\Middleware\RedirectIfAuthenticatedOrGuest::class,            
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
