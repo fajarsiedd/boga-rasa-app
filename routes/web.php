@@ -19,16 +19,18 @@ Route::middleware(['auth'])->group(function () {
 
     // Resources
     Route::resource('tipe-konsumen', CustomerTypeController::class);
-    Route::resource('konsumen', CustomerController::class)->except(['quickStore']);
-    Route::resource('pemasok', SupplierController::class)->except(['quickStore']);
+    Route::resource('konsumen', CustomerController::class);
+    Route::resource('pemasok', SupplierController::class);
     Route::resource('produk', ProductController::class);
     Route::resource('bahan-baku', MaterialController::class);
     Route::resource('penjualan', SaleController::class);
     Route::resource('pembelian', PurchaseController::class);
 
     // API
-    Route::post('/konsumen', [CustomerController::class, 'quickStore'])->name('konsumen.quickStore');
-    Route::post('/pemasok', [SupplierController::class, 'quickStore'])->name('pemasok.quickStore');
+    Route::prefix('api')->group(function () {
+        Route::post('/konsumen', [CustomerController::class, 'quickStore'])->name('konsumen.quickStore');
+        Route::post('/pemasok', [SupplierController::class, 'quickStore'])->name('pemasok.quickStore');
+    });
 });
 
 require __DIR__ . '/auth.php';

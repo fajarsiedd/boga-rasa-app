@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('stock')->default(0);
+            $table->integer('measure_per_jirangan')->default(0);
             $table->timestamps();
         });
     }

@@ -56,7 +56,7 @@ class PurchaseController extends Controller
             'details.*.qty' => 'required|integer|min:1',
             'details.*.subtotal' => 'required|integer|min:1',
             'receipt_image' => 'nullable|image|max:2048',
-        ]);        
+        ]);
 
         DB::beginTransaction();
 
@@ -74,7 +74,7 @@ class PurchaseController extends Controller
             $totalAmount = 0;
             $purchaseDetails = [];
 
-            foreach ($request->get('details') as $detail) {
+            foreach ($request->details as $detail) {
                 $materialId = $detail['material_id'];
                 $qty = $detail['qty'];
                 $subtotal = $detail['subtotal'];
@@ -91,7 +91,7 @@ class PurchaseController extends Controller
                     $material->stock += $qty;
                     $material->save();
                 }
-            }            
+            }
 
             $receiptImagePath = null;
             if ($request->hasFile('receipt_image')) {
@@ -100,10 +100,10 @@ class PurchaseController extends Controller
 
             $purchase = Purchase::create([
                 'code' => $purchaseCode,
-                'supplier_id' => $request->get('supplier_id'),
+                'supplier_id' => $request->supplier_id,
                 'total' => $totalAmount,
                 'receipt_image' => $receiptImagePath,
-            ]);            
+            ]);
 
             foreach ($purchaseDetails as $detailData) {
                 $purchase->details()->create($detailData);
@@ -114,8 +114,8 @@ class PurchaseController extends Controller
             return redirect()->route('pembelian.index')
                 ->with('success', 'Pembelian ' . $purchaseCode . ' berhasil ditambahkan.');
         } catch (\Throwable $th) {
-            // dd($th);
             DB::rollBack();
+
             return redirect()->route('pembelian.index')
                 ->with('error', 'Terjadi kesalahan saat menambahkan pembelian: ' . $th->getMessage())
                 ->withInput();
@@ -153,7 +153,7 @@ class PurchaseController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $this->authorize('edit-purchase');
+        $this->authorize('edit-purchase');        
 
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
@@ -161,7 +161,7 @@ class PurchaseController extends Controller
             'details.*.material_id' => 'required|exists:materials,id',
             'details.*.qty' => 'required|integer|min:1',
             'details.*.subtotal' => 'required|integer|min:1',
-            'receipt_image' => 'nullable|image|max:2048', // Max 2MB
+            'receipt_image' => 'nullable|image|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -172,7 +172,7 @@ class PurchaseController extends Controller
             foreach ($purchase->details as $oldDetail) {
                 $material = Material::find($oldDetail->material_id);
                 if ($material) {
-                    $material->stock -= $oldDetail->qty; // Kurangi stok
+                    $material->stock -= $oldDetail->qty;
                     $material->save();
                 }
             }
@@ -180,12 +180,12 @@ class PurchaseController extends Controller
             $purchase->details()->delete();
 
             $totalAmount = 0;
-            $purchaseDetails = [];
+            $purchaseDetails = [];            
 
-            foreach ($request->get('details') as $detail) {
+            foreach ($request->details as $detail) {
                 $materialId = $detail['material_id'];
                 $qty = $detail['qty'];
-                $subtotal = $detail['subtotal'];                
+                $subtotal = $detail['subtotal'];
 
                 $purchaseDetails[] = [
                     'material_id' => $materialId,
@@ -194,10 +194,9 @@ class PurchaseController extends Controller
                 ];
                 $totalAmount += $subtotal;
 
-                // Update stok bahan baku dengan kuantitas baru
                 $material = Material::find($materialId);
                 if ($material) {
-                    $material->stock += $qty; // Tambah stok
+                    $material->stock += $qty;
                     $material->save();
                 }
             }
@@ -205,21 +204,19 @@ class PurchaseController extends Controller
             $receiptImagePath = $purchase->receipt_image;
 
             if ($request->hasFile('receipt_image')) {
-                // Hapus gambar lama jika ada
                 if ($receiptImagePath) {
                     Storage::disk('public')->delete($receiptImagePath);
                 }
                 $receiptImagePath = $request->file('receipt_image')->store('purchase_receipts', 'public');
             } elseif ($request->boolean('remove_receipt_image')) {
-                // Hapus gambar jika ada flag remove_receipt_image dari frontend
                 if ($receiptImagePath) {
                     Storage::disk('public')->delete($receiptImagePath);
                 }
                 $receiptImagePath = null;
-            }            
+            }
 
             $purchase->update([
-                'supplier_id' => $request->get('supplier_id'),
+                'supplier_id' => $request->supplier_id,
                 'total' => $totalAmount,
                 'receipt_image' => $receiptImagePath,
             ]);
@@ -232,8 +229,9 @@ class PurchaseController extends Controller
 
             return redirect()->route('pembelian.index')
                 ->with('success', 'Pembelian ' . $purchase->code . ' berhasil diperbarui.');
-        } catch (\Throwable $th) {            
-            DB::rollBack();            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
             return redirect()->route('pembelian.index')
                 ->with('error', 'Terjadi kesalahan saat memperbarui pembelian: ' . $th->getMessage())
                 ->withInput();
@@ -251,28 +249,28 @@ class PurchaseController extends Controller
 
         try {
             $purchase = Purchase::find($id);
-            // Kembalikan stok bahan baku
+
             foreach ($purchase->details as $detail) {
                 $material = Material::find($detail->material_id);
                 if ($material) {
-                    $material->stock -= $detail->qty; // Kurangi stok sesuai jumlah yang dihapus
+                    $material->stock -= $detail->qty;
                     $material->save();
                 }
             }
 
-            // Hapus gambar nota jika ada
             if ($purchase->receipt_image) {
                 Storage::disk('public')->delete($purchase->receipt_image);
             }
 
-            $purchase->details()->delete(); // Hapus detail terkait
-            $purchase->delete(); // Hapus pembelian utama
+            $purchase->details()->delete();
+            $purchase->delete();
             DB::commit();
 
             return redirect()->route('pembelian.index')
                 ->with('success', 'Pembelian ' . $purchase->code . ' berhasil dihapus.');
         } catch (\Exception $th) {
             DB::rollBack();
+
             return redirect()->route('pembelian.index')
                 ->with('error', 'Terjadi kesalahan saat menghapus pembelian: ' . $th->getMessage());
         }

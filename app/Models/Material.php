@@ -18,5 +18,6 @@ class Material extends Model
     protected $fillable = [
         'name',
         'stock',
+        'measure_per_jirangan',
     ];    
 }

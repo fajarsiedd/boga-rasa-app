@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -9,9 +9,8 @@ const props = defineProps({
 const form = useForm({
     name: props.material.name,
     stock: props.material.stock,
+    measure_per_jirangan: props.material.measure_per_jirangan
 });
-
-const flash = computed(() => usePage().props.flash);
 
 const submit = () => {
     form.put(route('bahan-baku.update', props.material.id), {
@@ -22,59 +21,66 @@ const submit = () => {
 </script>
 
 <template>
+    <AuthenticatedLayout>
 
-    <Head :title="`Edit Bahan Baku: ${material.name}`" />
+        <Head title="Edit Bahan Baku Baru" />
 
-    <div class="py-12">
-        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <!-- Pesan Flash -->
-                    <div v-if="flash.success"
-                        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                        role="alert">
-                        <strong class="font-bold">Sukses!</strong>
-                        <span class="block sm:inline">{{ flash.success }}</span>
-                    </div>
-                    <div v-if="flash.error"
-                        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-                        role="alert">
-                        <strong class="font-bold">Error!</strong>
-                        <span class="block sm:inline">{{ flash.error }}</span>
-                    </div>
+        <template #header>
+            <h2 class="font-semibold text-lg text-gray-700 leading-tight">Edit Bahan Baku - {{ props.material.name }}
+            </h2>
+        </template>
 
-                    <form @submit.prevent="submit">
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Bahan Baku <span
-                                    class="text-red-500">*</span></label>
-                            <input id="name" type="text"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                v-model="form.name" required autofocus />
-                            <div v-if="form.errors.name" class="text-red-600 text-sm mt-1">{{ form.errors.name }}</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="stock" class="block text-sm font-medium text-gray-700">Stok</label>
-                            <input id="stock" type="number"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                v-model="form.stock" />
-                            <div v-if="form.errors.stock" class="text-red-600 text-sm mt-1">{{ form.errors.stock
-                            }}
+        <div class="py-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <form @submit.prevent="submit">
+                            <div class="mb-4">
+                                <label for="name" class="block text-sm font-medium text-gray-700">Nama Konsumen
+                                    <span class="text-red-500">*</span></label>
+                                <input id="name" type="text"
+                                    class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
+                                    v-model="form.name" required autofocus />
+                                <div v-if="form.errors.name" class="text-red-600 text-sm mt-1">{{ form.errors.name }}
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="flex items-center justify-end mt-6">
-                            <Link :href="route('bahan-baku.index')" class="text-gray-600 hover:text-gray-900 mr-4">
-                            Batal</Link>
-                            <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150"
-                                :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                                Perbarui
-                            </button>
-                        </div>
-                    </form>
+                            <div class="mb-4">
+                                <label for="stock" class="block text-sm font-medium text-gray-700">Stok
+                                    <span class="text-red-500">*</span></label>
+                                <input id="stock" type="number"
+                                    class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
+                                    v-model="form.stock" required />
+                                <div v-if="form.errors.stock" class="text-red-600 text-sm mt-1">{{ form.errors.stock }}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="measure_per_jirangan"
+                                    class="block text-sm font-medium text-gray-700">Takaran/Jirangan
+                                    <span class="text-red-500">*</span></label>
+                                <input id="measure_per_jirangan" type="number"
+                                    class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
+                                    v-model="form.measure_per_jirangan" required />
+                                <div v-if="form.errors.measure_per_jirangan" class="text-red-600 text-sm mt-1">{{
+                                    form.errors.measure_per_jirangan }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end mt-12">
+                                <Link :href="route('bahan-baku.index')"
+                                    class="px-4 py-2 outline rounded-md min-w-32 text-center hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 mr-4 font-semibold">
+                                Batal</Link>
+                                <button type="submit"
+                                    class="inline-flex items-center justify-center px-4 py-2 min-w-32 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </AuthenticatedLayout>
 </template>

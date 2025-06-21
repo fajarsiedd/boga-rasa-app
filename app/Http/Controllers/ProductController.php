@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -46,14 +47,26 @@ class ProductController extends Controller
             'produce_per_jirangan' => 'required|integer',
         ]);
 
-        Product::create([
-            'code' => $request->code,
-            'name' => $request->name,
-            'price' => $request->price,
-            'produce_per_jirangan' => $request->produce_per_jirangan,
-        ]);
+        DB::beginTransaction();
 
-        return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan.');
+        try {
+            Product::create([
+                'code' => $request->code,
+                'name' => $request->name,
+                'price' => $request->price,
+                'produce_per_jirangan' => $request->produce_per_jirangan,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('produk.index')->with('success', 'Produk ' . $request->name . ' berhasil ditambahkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('produk.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan produk: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -92,13 +105,26 @@ class ProductController extends Controller
             'produce_per_jirangan' => 'required|integer',
         ]);
 
-        $product = Product::find($id);
-        $product->code = $request->get('code');
-        $product->name = $request->get('name');
-        $product->price = $request->get('price');
-        $product->produce_per_jirangan = $request->get('produce_per_jirangan');
+        DB::beginTransaction();
 
-        return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui.');
+        try {
+            $product = Product::find($id);
+            $product->code = $request->code;
+            $product->name = $request->name;
+            $product->price = $request->price;
+            $product->produce_per_jirangan = $request->produce_per_jirangan;
+            $product->save();
+
+            DB::commit();
+
+            return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('produk.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui produk: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -108,9 +134,21 @@ class ProductController extends Controller
     {
         $this->authorize('delete-product');
 
-        $product = Product::find($id);
-        $product->delete();
+        DB::beginTransaction();
 
-        return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
+        try {
+            $product = Product::find($id);
+            $product->delete();
+
+            DB::commit();
+
+            return redirect()->route('produk.index')->with('success', 'Produk ' . $product->name . ' berhasil dihapus.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('produk.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui produk: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 }

@@ -1,137 +1,163 @@
 <script setup>
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
 
 const props = defineProps({
-    sales: Array, // Prop yang dikirim dari controller
+    sales: Array,
 });
 
-// Mengambil pesan flash dari session
 const flash = computed(() => usePage().props.flash);
 
-// Computed properties untuk memeriksa izin
 const canCreate = computed(() => usePage().props.auth.user.can['create-sale']);
 const canEdit = computed(() => usePage().props.auth.user.can['edit-sale']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-sale']);
-const canView = computed(() => usePage().props.auth.user.can['view-sales']); // Untuk visibilitas keseluruhan
 
-// Fungsi untuk menghapus penjualan
 const deleteSale = (id) => {
-    if (!canDelete.value) {
-        alert('Anda tidak memiliki izin untuk menghapus penjualan.'); // Ganti dengan modal notifikasi
-        return;
-    }
-
     if (confirm('Apakah Anda yakin ingin menghapus penjualan ini? Semua detail terkait juga akan dihapus.')) {
         router.delete(route('penjualan.destroy', id), {
-            preserveScroll: true, // Pertahankan posisi scroll setelah delete
+            preserveScroll: true,
         });
     }
 };
 </script>
 
 <template>
+    <AuthenticatedLayout>
 
-    <Head title="Daftar Penjualan" />
+        <Head title="Daftar Penjualan" />
 
-    <!-- <template #header>
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Daftar Penjualan</h2>
-    </template> -->
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900" v-if="canView">
-                    <!-- Pesan Flash -->
-                    <div v-if="flash.success"
-                        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                        role="alert">
-                        <strong class="font-bold">Sukses!</strong>
-                        <span class="block sm:inline">{{ flash.success }}</span>
-                    </div>
-                    <div v-if="flash.error"
-                        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-                        role="alert">
-                        <strong class="font-bold">Error!</strong>
-                        <span class="block sm:inline">{{ flash.error }}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center mb-4">
-                        <Link v-if="canCreate" :href="route('penjualan.create')"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
-                        Tambah Penjualan Baru
-                        </Link>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden shadow">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Kode</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Konsumen</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Total</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tgl. Lunas</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Detail Produk</th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-if="sales.length === 0">
-                                    <td colspan="6"
-                                        class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                        Belum ada data penjualan.
-                                    </td>
-                                </tr>
-                                <tr v-for="sale in sales" :key="sale.id">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
-                                        sale.code
-                                        }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sale.customer.name
-                                        }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{
-                                        sale.total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sale.paid_at ? new
-                                        Date(sale.paid_at).toLocaleDateString('id-ID') : 'Belum Lunas' }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">
-                                        <ul class="list-disc list-inside">
-                                            <li v-for="detail in sale.details" :key="detail.id">
-                                                {{ detail.product.name }} ({{ detail.qty }}x) - Rp{{
-                                                detail.final_price.toLocaleString('id-ID') }}
-                                            </li>
-                                        </ul>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
-                                            class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</Link>
-                                        <button v-if="canDelete" @click="deleteSale(sale.id)"
-                                            class="text-red-600 hover:text-red-900 focus:outline-none">Hapus</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <template #header>
+            <div class="flex flex-row items-center justify-start">
+                <h2 class="font-semibold text-lg text-gray-700 leading-tight mr-6">Daftar Penjualan</h2>
+                <div
+                    class="group flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-400 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-green-700">
+                    <input type="text" name="search" id="search"
+                        class="block min-w-0 w-50 grow py-1.5 pr-2 pl-1 text-base text-gray-700 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                        placeholder="Masukkan kode penjualan" />
+                    <Link>
+                    <IconSearch
+                        class="mr-2 text-gray-400 group-focus-within:text-green-700 group-hover:text-green-700 transition-colors duration-200"
+                        stroke="1.5" />
+                    </Link>
                 </div>
-                <div v-else class="p-6 text-gray-900">
-                    <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
-                        role="alert">
-                        Anda tidak memiliki izin untuk melihat daftar penjualan.
+            </div>
+        </template>
+
+        <div class="py-8 bg-gray-50">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-700">
+                        <!-- Pesan Flash -->
+                        <div v-if="flash.success"
+                            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded flex flex-row items-start mb-4"
+                            role="alert">
+                            <IconCircleCheckFilled />
+                            <div class="ml-2 w-full">
+                                <span class="font-semibold">Sukses! </span>
+                                <span class="block sm:inline">{{ flash.success }}</span>
+                            </div>
+                            <button type="button" @click="() => flash.success = null" class="hover:cursor-pointer">
+                                <IconX class="text-gray-700" />
+                            </button>
+                        </div>
+                        <div v-if="flash.error"
+                            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-start mb-4"
+                            role="alert">
+                            <IconXboxXFilled />
+                            <div class="ml-2 w-full">
+                                <span class="font-semibold">Error! </span>
+                                <span class="block sm:inline">{{ flash.error }}</span>
+                            </div>
+                            <button type="button" @click="() => flash.success = null" class="hover:cursor-pointer">
+                                <IconX class="text-gray-700" />
+                            </button>
+                        </div>
+
+                        <div class="flex justify-end items-center mb-4">
+                            <Link v-if="canCreate" :href="route('penjualan.create')"
+                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <IconPlus class="mr-2" size="20" />
+                            <span>Buat Transaksi Penjualan</span>
+                            </Link>
+                        </div>
+
+                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
+                                <thead class="bg-green-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Kode</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Konsumen</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Total</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Status Pembayaran</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Tgl. Transaksi</th>
+                                        <th v-if="canEdit || canDelete"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-if="sales.length === 0">
+                                        <td colspan="6"
+                                            class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
+                                            Belum ada data penjualan.
+                                        </td>
+                                    </tr>
+                                    <tr v-for="sale in sales" :key="sale.id" :class="{
+                                        'border-b border-gray-200': sale.id != sales[sales.length - 1].id,
+                                        'border-none': sale.id == sales[sales.length - 1].id
+                                    }">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
+                                            sale.code
+                                            }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                            sale.customer.name
+                                            }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                            sale.total.toLocaleString('id-ID', {
+                                                style: 'currency', currency: 'IDR',
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0
+                                            })
+                                            }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-xs">
+                                            <div v-if="sale.paid_at"
+                                                class="inline px-4 py-1 rounded-full bg-green-100 uppercase text-green-600 outline outline-green-600 text-center font-semibold">
+                                                Lunas
+                                            </div>
+                                            <div v-else
+                                                class="inline px-4 py-1 rounded-full bg-red-100 uppercase text-red-400 outline outline-red-400 text-center font-semibold">
+                                                Ditunda
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
+                                                class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                            <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
+                                                class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
+                                            <button v-if="canDelete" @click="deleteSale(sale.id)"
+                                                class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </AuthenticatedLayout>
 </template>

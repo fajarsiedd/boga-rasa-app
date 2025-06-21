@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomerType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CustomerTypeController extends Controller
@@ -15,10 +16,10 @@ class CustomerTypeController extends Controller
     {
         $this->authorize('view-customer-types');
 
-        $customer_types = CustomerType::all();
+        $customerTypes = CustomerType::all();
 
         return Inertia::render('CustomerTypes/Index', [
-            'customer_types' => $customer_types
+            'customerTypes' => $customerTypes
         ]);
     }
 
@@ -41,15 +42,27 @@ class CustomerTypeController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'discount' => 'nullable|integer|min:0|max_digits:3'
+            'discount' => 'required|integer|min:0|max_digits:3'
         ]);
 
-        CustomerType::create([
-            'name' => $request->name,
-            'discount' => $request->discount
-        ]);
+        DB::beginTransaction();
 
-        return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen berhasil ditambahkan.');
+        try {
+            CustomerType::create([
+                'name' => $request->name,
+                'discount' => $request->discount
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen ' . $request->name . ' berhasil ditambahkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('tipe-konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan tipe konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -64,13 +77,13 @@ class CustomerTypeController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-    {        
+    {
         $this->authorize('edit-customer-type');
 
-        $customer_type = CustomerType::find($id);
+        $customerType = CustomerType::find($id);
 
         return Inertia::render('CustomerTypes/Edit', [
-            'customer_type' => $customer_type
+            'customerType' => $customerType
         ]);
     }
 
@@ -78,20 +91,32 @@ class CustomerTypeController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {        
-        $this->authorize('edit-customer-type');        
+    {
+        $this->authorize('edit-customer-type');
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'discount' => 'nullable|integer|min:0|max_digits:3'
+            'discount' => 'required|integer|min:0|max_digits:3'
         ]);
 
-        $customer_type = CustomerType::find($id);
-        $customer_type->name = $request->get('name');
-        $customer_type->discount = $request->get('discount');               
-        $customer_type->save();
+        DB::beginTransaction();
 
-        return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen berhasil diperbarui.');
+        try {
+            $customerType = CustomerType::find($id);
+            $customerType->name = $request->name;
+            $customerType->discount = $request->discount;
+            $customerType->save();
+
+            DB::commit();
+
+            return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('tipe-konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui tipe konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -101,10 +126,21 @@ class CustomerTypeController extends Controller
     {
         $this->authorize('delete-customer-type');
 
-        $customer_type = CustomerType::find($id);
+        DB::beginTransaction();
 
-        $customer_type->delete();
+        try {
+            $customerType = CustomerType::find($id);
+            $customerType->delete();
 
-        return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen berhasil dihapus.');
+            DB::commit();
+
+            return redirect()->route('tipe-konsumen.index')->with('success', 'Tipe konsumen ' . $customerType->name . ' berhasil dihapus.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('tipe-konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui tipe konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 }

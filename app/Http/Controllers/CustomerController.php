@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\CustomerType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -16,7 +17,7 @@ class CustomerController extends Controller
     {
         $this->authorize('view-customers');
 
-        $customers = Customer::with('customer_type')->orderBy('name')->get();
+        $customers = Customer::with('customerType')->orderBy('name')->get();
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers
@@ -30,10 +31,10 @@ class CustomerController extends Controller
     {
         $this->authorize('create-customer');
 
-        $customer_types = CustomerType::all();
+        $customerTypes = CustomerType::all();
 
         return Inertia::render('Customers/Create', [
-            'customerTypes' => $customer_types
+            'customerTypes' => $customerTypes
         ]);
     }
 
@@ -50,13 +51,25 @@ class CustomerController extends Controller
             'customer_type_id' => 'required|exists:customer_types,id',
         ]);
 
-        Customer::create([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'customer_type_id' => $request->customer_type_id
-        ]);
+        DB::beginTransaction();
 
-        return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil ditambahkan.');
+        try {
+            Customer::create([
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'customer_type_id' => $request->customer_type_id
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('konsumen.index')->with('success', 'Konsumen ' . $request->name . ' berhasil ditambahkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     public function quickStore(Request $request)
@@ -69,6 +82,8 @@ class CustomerController extends Controller
             'customer_type_id' => 'required|exists:customer_types,id',
         ]);
 
+        DB::beginTransaction();
+
         try {
             $customer = Customer::create([
                 'name' => $request->name,
@@ -76,7 +91,9 @@ class CustomerController extends Controller
                 'customer_type_id' => $request->customer_type_id
             ]);
 
-            $data = Customer::with('customer_type')->find($customer->id);
+            $data = Customer::with('customerType')->find($customer->id);
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -84,6 +101,8 @@ class CustomerController extends Controller
                 'data' => $data
             ]);
         } catch (\Throwable $th) {
+            DB::rollBack();
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambah konsumen',
@@ -107,12 +126,12 @@ class CustomerController extends Controller
     {
         $this->authorize('edit-customer');
 
-        $customer = Customer::with('customer_type')->find($id);
-        $customer_types = CustomerType::all();
+        $customer = Customer::with('customerType')->find($id);
+        $customerTypes = CustomerType::all();
 
         return Inertia::render('Customers/Edit', [
             'customer' => $customer,
-            'customerTypes' => $customer_types
+            'customerTypes' => $customerTypes
         ]);
     }
 
@@ -129,14 +148,25 @@ class CustomerController extends Controller
             'customer_type_id' => 'required|exists:customer_types,id',
         ]);
 
-        $customer = Customer::find($id);
-        $customer->name = $request->get('name');
-        $customer->phone = $request->get('phone');
-        $customer->customer_type_id = $request->get('customer_type_id');
+        DB::beginTransaction();
 
-        $customer->save();
+        try {
+            $customer = Customer::find($id);
+            $customer->name = $request->name;
+            $customer->phone = $request->phone;
+            $customer->customer_type_id = $request->customer_type_id;
+            $customer->save();
 
-        return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil diperbarui.');
+            DB::commit();
+
+            return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -146,9 +176,21 @@ class CustomerController extends Controller
     {
         $this->authorize('delete-customer');
 
-        $customer = Customer::find($id);
-        $customer->delete();
+        DB::beginTransaction();
 
-        return redirect()->route('konsumen.index')->with('success', 'Tipe konsumen berhasil dihapus.');
+        try {
+            $customer = Customer::find($id);
+            $customer->delete();
+
+            DB::commit();
+
+            return redirect()->route('konsumen.index')->with('success', 'Konsumen ' . $customer->name . ' berhasil dihapus.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('konsumen.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus konsumen: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class MaterialController extends Controller
@@ -41,15 +42,29 @@ class MaterialController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'stock' => 'nullable|integer|min:0'
+            'stock' => 'required|integer|min:0',
+            'measure_per_jirangan' => 'required|integer|min:0'
         ]);
 
-        Material::create([
-            'name' => $request->get('name'),
-            'stock' => $request->get('stock')
-        ]);
+        DB::beginTransaction();
 
-        return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku berhasil ditambahkan.');
+        try {
+            Material::create([
+                'name' => $request->name,
+                'stock' => $request->stock,
+                'measure_per_jirangan' => $request->measure_per_jirangan
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku ' . $request->name . ' berhasil ditambahkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('bahan-baku.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan bahan baku: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -67,7 +82,7 @@ class MaterialController extends Controller
     {
         $this->authorize('edit-material');
 
-        $material = Material::find($id);
+        $material = Material::find($id);        
 
         return Inertia::render('Materials/Edit', [
             'material' => $material
@@ -83,15 +98,29 @@ class MaterialController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'discount' => 'nullable|integer|min:0'
+            'stock' => 'required|integer|min:0',
+            'measure_per_jirangan' => 'required|integer|min:0'
         ]);
 
-        $material = Material::find($id);
-        $material->name = $request->get('name');
-        $material->stock = $request->get('stock');
-        $material->save();
+        DB::beginTransaction();
 
-        return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku berhasil diperbarui.');
+        try {
+            $material = Material::find($id);
+            $material->name = $request->name;
+            $material->stock = $request->stock;
+            $material->measure_per_jirangan = $request->measure_per_jirangan;
+            $material->save();
+
+            DB::commit();
+
+            return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('bahan-baku.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui bahan baku: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -101,10 +130,21 @@ class MaterialController extends Controller
     {
         $this->authorize('delete-material');
 
-        $material = Material::find($id);
+        DB::beginTransaction();
 
-        $material->delete();
+        try {
+            $material = Material::find($id);
+            $material->delete();
 
-        return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku berhasil dihapus.');
+            DB::commit();
+
+            return redirect()->route('bahan-baku.index')->with('success', 'Bahan baku ' . $material->name . ' berhasil dihapus.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('bahan-baku.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus bahan baku: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 }

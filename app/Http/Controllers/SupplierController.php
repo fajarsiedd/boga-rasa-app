@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SupplierController extends Controller
@@ -39,17 +40,29 @@ class SupplierController extends Controller
     {
         $this->authorize('create-supplier');
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:suppliers',
-        ]);
+        DB::beginTransaction();
 
-        Supplier::create([
-            'name' => $request->name,
-            'phone' => $request->phone
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'phone' => 'nullable|string|max:20|unique:suppliers',
+            ]);
 
-        return redirect()->route('pemasok.index')->with('success', 'Pemasok berhasil ditambahkan.');
+            Supplier::create([
+                'name' => $request->name,
+                'phone' => $request->phone
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('pemasok.index')->with('success', 'Pemasok ' . $request->name . ' berhasil ditambahkan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('pemasok.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan pemasok: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     public function quickStore(Request $request)
@@ -61,11 +74,15 @@ class SupplierController extends Controller
             'phone' => 'nullable|string|max:20|unique:suppliers',
         ]);
 
+        DB::beginTransaction();
+
         try {
             $supplier = Supplier::create([
                 'name' => $request->name,
                 'phone' => $request->phone
             ]);
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -73,6 +90,8 @@ class SupplierController extends Controller
                 'data' => $supplier
             ]);
         } catch (\Throwable $th) {
+            DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambah pemasok',
@@ -110,17 +129,29 @@ class SupplierController extends Controller
     {
         $this->authorize('edit-supplier');
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:suppliers,phone,' . $id,
-        ]);
+        DB::beginTransaction();
 
-        $supplier = Supplier::find($id);
-        $supplier->name = $request->get('name');
-        $supplier->phone = $request->get('phone');
-        $supplier->save();
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'phone' => 'nullable|string|max:20|unique:suppliers,phone,' . $id,
+            ]);
 
-        return redirect()->route('pemasok.index')->with('success', 'Pemasok berhasil diperbarui.');
+            $supplier = Supplier::find($id);
+            $supplier->name = $request->name;
+            $supplier->phone = $request->phone;
+            $supplier->save();
+
+            DB::commit();
+
+            return redirect()->route('pemasok.index')->with('success', 'Pemasok berhasil diperbarui.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return redirect()->route('pemasok.index')
+                ->with('error', 'Terjadi kesalahan saat menambahkan pemasok: ' . $th->getMessage())
+                ->withInput();
+        }
     }
 
     /**

@@ -22,7 +22,7 @@ class Customer extends Model
         'customer_type_id',        
     ];
 
-    public function customer_type(): BelongsTo
+    public function customerType(): BelongsTo
     {
         return $this->belongsTo(CustomerType::class);
     }    
