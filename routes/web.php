@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerTypeController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
@@ -25,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('bahan-baku', MaterialController::class);
     Route::resource('penjualan', SaleController::class);
     Route::resource('pembelian', PurchaseController::class);
+    Route::resource('pesanan', OrderController::class);
 
     // API
     Route::prefix('api')->group(function () {

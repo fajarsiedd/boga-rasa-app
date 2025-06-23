@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
             $table->foreignId('customer_id')->constrained('customers');
-            $table->dateTime('picked_in');
+            $table->dateTime('date');
             $table->timestamp('picked_at')->nullable();
             $table->timestamps();
         });

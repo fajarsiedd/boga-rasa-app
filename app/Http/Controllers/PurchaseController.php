@@ -65,11 +65,11 @@ class PurchaseController extends Controller
             $nextCodeNumber = 1;
 
             if ($lastPurchase && $lastPurchase->code) {
-                $lastCodeNumber = (int) substr($lastPurchase->code, 1);
+                $lastCodeNumber = (int) substr($lastPurchase->code, 2);
                 $nextCodeNumber = $lastCodeNumber + 1;
             }
 
-            $purchaseCode = 'B' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
+            $purchaseCode = 'P' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
 
             $totalAmount = 0;
             $purchaseDetails = [];
@@ -112,12 +112,12 @@ class PurchaseController extends Controller
             DB::commit();
 
             return redirect()->route('pembelian.index')
-                ->with('success', 'Pembelian ' . $purchaseCode . ' berhasil ditambahkan.');
+                ->with('success', 'Pembelian ' . $purchaseCode . ' berhasil dibuat.');
         } catch (\Throwable $th) {
             DB::rollBack();
 
             return redirect()->route('pembelian.index')
-                ->with('error', 'Terjadi kesalahan saat menambahkan pembelian: ' . $th->getMessage())
+                ->with('error', 'Terjadi kesalahan saat membuat pembelian: ' . $th->getMessage())
                 ->withInput();
         }
     }

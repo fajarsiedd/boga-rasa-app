@@ -92,9 +92,7 @@ const deleteCustomerType = (id) => {
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Diskon</th>
-                                        <th
-                                            class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        </th>
+                                        <th v-if="canEdit || canDelete"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -111,9 +109,7 @@ const deleteCustomerType = (id) => {
                                             customer_type.discount ||
                                             '-'
                                         }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link v-if="canEdit" :href="route('tipe-konsumen.edit', customer_type.id)"
-                                                class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                        <td v-if="canEdit || canDelete" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">                                            
                                             <Link v-if="canEdit" :href="route('tipe-konsumen.edit', customer_type.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                             <button v-if="canDelete" @click="deleteCustomerType(customer_type.id)"

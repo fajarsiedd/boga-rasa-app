@@ -9,6 +9,7 @@ const props = defineProps({
 
 const flash = computed(() => usePage().props.flash);
 
+const canView = computed(() => usePage().props.auth.user.can['view-sales']);
 const canCreate = computed(() => usePage().props.auth.user.can['create-sale']);
 const canEdit = computed(() => usePage().props.auth.user.can['edit-sale']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-sale']);
@@ -101,7 +102,7 @@ const deleteSale = (id) => {
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Tgl. Transaksi</th>
-                                        <th v-if="canEdit || canDelete"></th>
+                                        <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -143,8 +144,8 @@ const deleteSale = (id) => {
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
+                                        <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link v-if="canView" :href="route('penjualan.edit', sale.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>

@@ -13,7 +13,8 @@ import {
     IconChevronRight,
     IconChevronLeft,
     IconMenu,
-    IconChevronDown
+    IconChevronDown,
+    IconChecklist
 } from '@tabler/icons-vue';
 import SidebarMenuItem from '@/Components/SidebarMenuItem.vue';
 
@@ -90,6 +91,10 @@ const logout = () => {
                     <h3 v-if="sidebarExpanded" class="text-xs uppercase text-gray-700 px-3 mb-2">Menu Utama</h3>
                     <h3 v-else class="text-xs uppercase text-gray-700 text-center mb-2">...</h3>
 
+                    <!-- Pesanan -->
+                    <SidebarMenuItem :href="route('pesanan.index')" text="Pesanan" :icon="IconChecklist"
+                        :sidebarExpanded="sidebarExpanded" :isActive="route().current('pesanan.*')" />
+
                     <!-- Penjualan -->
                     <SidebarMenuItem :href="route('penjualan.index')" text="Penjualan" :icon="IconShoppingCart"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('penjualan.*')" />
@@ -162,6 +167,10 @@ const logout = () => {
                 <!-- Menu Utama -->
                 <div class="pt-4 border-t border-gray-300 mt-4">
                     <h3 class="text-xs uppercase text-gray-700 px-3 mb-2">Menu Utama</h3>
+
+                    <!-- Pesanan -->
+                    <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('pesanan.index')"
+                        text="Pesanan" :icon="IconChecklist" :isActive="route().current('pesanan.*')" />
 
                     <!-- Penjualan -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('penjualan.index')"

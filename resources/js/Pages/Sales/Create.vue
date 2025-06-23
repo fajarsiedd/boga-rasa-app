@@ -1,15 +1,18 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { computed, ref, watch, onMounted } from 'vue';
 import AddCustomerModal from '@/Components/AddCustomerModal.vue';
 import SaleDetailRow from '@/Components/SaleDetailRow.vue';
-import { IconPlus, IconChevronDown } from '@tabler/icons-vue';
+import { IconPlus, IconChevronDown, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
 
 const props = defineProps({
+    order: Object,
     customers: Array,
     customerTypes: Array,
     products: Array,
 });
+
+const flash = computed(() => usePage().props.flash);
 
 const form = useForm({
     customer_id: '',
@@ -18,6 +21,19 @@ const form = useForm({
     details: [
         { product_id: '', qty: 1, final_price: 0, subtotal: 0 }
     ],
+});
+
+onMounted(() => {
+    if (props.order) {
+        form.customer_id = props.order.customer_id;
+        form.details = props.order.details.map(detail => ({
+            id: detail.id,
+            product_id: detail.product_id,
+            qty: detail.qty,
+            final_price: detail.final_price,
+            subtotal: detail.subtotal,
+        }));
+    }
 });
 
 const isPaid = computed(() => form.is_paid);
@@ -64,7 +80,12 @@ const handleNewCustomerAdded = (newCustomer) => {
 const submitForm = () => {
     form.total = grandTotal.value;
 
-    form.post(route('penjualan.store'), {
+    let storeRoute = route('penjualan.store');
+    if (props.order) {
+        storeRoute = route('penjualan.store', { order_id: props.order.id })
+    }
+
+    form.post(storeRoute, {
         onSuccess: () => {
             form.reset();
             form.details = [{ product_id: '', qty: 1, final_price: 0, subtotal: 0 }];
@@ -77,6 +98,7 @@ const submitForm = () => {
 
 <template>
     <AuthenticatedLayout>
+
         <Head title="Buat Transaksi Penjualan" />
 
         <template #header>
@@ -87,6 +109,32 @@ const submitForm = () => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-700">
+                        <!-- Pesan Flash -->
+                        <div v-if="flash.success"
+                            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded flex flex-row items-start mb-4"
+                            role="alert">
+                            <IconCircleCheckFilled />
+                            <div class="ml-2 w-full">
+                                <span class="font-semibold">Sukses! </span>
+                                <span class="block sm:inline">{{ flash.success }}</span>
+                            </div>
+                            <button type="button" @click="() => flash.success = null" class="hover:cursor-pointer">
+                                <IconX class="text-gray-700" />
+                            </button>
+                        </div>
+                        <div v-if="flash.error"
+                            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-start mb-4"
+                            role="alert">
+                            <IconXboxXFilled />
+                            <div class="ml-2 w-full">
+                                <span class="font-semibold">Error! </span>
+                                <span class="block sm:inline">{{ flash.error }}</span>
+                            </div>
+                            <button type="button" @click="() => flash.success = null" class="hover:cursor-pointer">
+                                <IconX class="text-gray-700" />
+                            </button>
+                        </div>
+
                         <form @submit.prevent="submitForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <!-- Customer Selection -->
@@ -187,7 +235,7 @@ const submitForm = () => {
                             <hr class="my-6 border-gray-300" />
 
                             <div class="flex items-center justify-end mt-6">
-                                <Link :href="route('penjualan.index')"
+                                <Link :href="order ? route('pesanan.index') : route('penjualan.index')"
                                     class="px-4 py-2 outline rounded-md min-w-32 text-center hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 mr-4 font-semibold">
                                 Batal</Link>
                                 <button type="submit"

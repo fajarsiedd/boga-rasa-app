@@ -9,6 +9,7 @@ const props = defineProps({
 
 const flash = computed(() => usePage().props.flash);
 
+const canView = computed(() => usePage().props.auth.user.can['view-purchases']);
 const canCreate = computed(() => usePage().props.auth.user.can['create-purchase']);
 const canEdit = computed(() => usePage().props.auth.user.can['edit-purchase']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-purchase']);
@@ -101,9 +102,7 @@ const deletePurchase = (id) => {
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Tgl. Transaksi</th>
-                                        <th
-                                            class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        </th>
+                                        <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -134,8 +133,8 @@ const deletePurchase = (id) => {
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {{ new Date(purchase.created_at).toLocaleDateString('id-ID') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link v-if="canEdit" :href="route('pembelian.edit', purchase.id)"
+                                        <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link v-if="canView" :href="route('pembelian.edit', purchase.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('pembelian.edit', purchase.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>

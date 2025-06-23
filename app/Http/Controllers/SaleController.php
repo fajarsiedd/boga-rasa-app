@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\CustomerType;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -29,15 +31,26 @@ class SaleController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create-sale');
+
+        $order = null;
+        $orderId = $request->query('order_id');
+        if ($orderId) {
+            $order = Order::with('details.product', 'customer.customerType')->find($orderId);
+
+            if (!$order) {
+                return redirect()->route('penjualan.create')->with('error', 'Pesanan tidak ditemukan.');
+            }
+        }
 
         $customers = Customer::with('customerType')->orderBy('name')->get();
         $customerTypes = CustomerType::all();
         $products = Product::orderBy('name')->get();
 
         return Inertia::render('Sales/Create', [
+            'order' => $order,
             'customers' => $customers,
             'customerTypes' => $customerTypes,
             'products' => $products
@@ -52,7 +65,7 @@ class SaleController extends Controller
         $this->authorize('create-sale');
 
         $request->validate([
-            'customer_id' => 'required|exists:customers,id',            
+            'customer_id' => 'required|exists:customers,id',
             'is_paid' => 'boolean',
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
@@ -67,11 +80,11 @@ class SaleController extends Controller
             $nextCodeNum = 1;
 
             if ($lastSale && $lastSale->code) {
-                $last_code_num = (int) substr($lastSale->code, 1);
-                $nextCodeNum = $last_code_num + 1;
+                $lastCodeNum = (int) substr($lastSale->code, 2);
+                $nextCodeNum = $lastCodeNum + 1;
             }
 
-            $code = 'P' . str_pad($nextCodeNum, 4, '0', STR_PAD_LEFT);
+            $code = 'S-' . str_pad($nextCodeNum, 4, '0', STR_PAD_LEFT);
             $total = 0;
             $saleDetails = [];
 
@@ -105,14 +118,31 @@ class SaleController extends Controller
                 $sale->details()->create($detail);
             }
 
+            $orderId = $request->query('order_id');
+            $order = null;
+            if ($orderId) {
+                $order = Order::find($orderId);
+
+                if (!$order) {
+                    return redirect()->route('penjualan.create')->with('error', 'Pesanan tidak ditemukan.');
+                }
+
+                $order->picked_at = Carbon::now();
+                $order->save();
+            }
+
             DB::commit();
 
-            return redirect()->route('penjualan.index')->with('success', 'Penjualan ' . $code . ' berhasil ditambahkan.');
+            if ($orderId) {
+                return redirect()->route('pesanan.index')->with('success', 'Pesanan ' . $order->code . ' berhasil diselesaikan.');
+            } else {
+                return redirect()->route('penjualan.index')->with('success', 'Penjualan ' . $code . ' berhasil dibuat.');
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
 
             return redirect()->route('penjualan.index')
-                ->with('error', 'Terjadi kesalahan saat menambahkan penjualan: ' . $th->getMessage())
+                ->with('error', 'Terjadi kesalahan saat membuat penjualan: ' . $th->getMessage())
                 ->withInput();
         }
     }

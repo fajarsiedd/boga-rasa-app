@@ -1,21 +1,24 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconCircleCheck } from '@tabler/icons-vue';
 
 const props = defineProps({
-    products: Array,
+    orders: Array,
 });
 
 const flash = computed(() => usePage().props.flash);
 
-const canCreate = computed(() => usePage().props.auth.user.can['create-product']);
-const canEdit = computed(() => usePage().props.auth.user.can['edit-product']);
-const canDelete = computed(() => usePage().props.auth.user.can['delete-product']);
+const canView = computed(() => usePage().props.auth.user.can['view-orders']);
+const canCreate = computed(() => usePage().props.auth.user.can['create-order']);
+const canEdit = computed(() => usePage().props.auth.user.can['edit-order']);
+const canDelete = computed(() => usePage().props.auth.user.can['delete-order']);
 
-const deleteProduct = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-        router.delete(route('produk.destroy', id));
+const deleteOrder = (id) => {
+    if (confirm('Apakah Anda yakin ingin menghapus pesanan ini? Semua detail terkait juga akan dihapus.')) {
+        router.delete(route('pesanan.destroy', id), {
+            preserveScroll: true,
+        });
     }
 };
 </script>
@@ -23,16 +26,16 @@ const deleteProduct = (id) => {
 <template>
     <AuthenticatedLayout>
 
-        <Head title="Daftar Produk" />
+        <Head title="Daftar Pesanan" />
 
         <template #header>
             <div class="flex flex-row items-center justify-start">
-                <h2 class="font-semibold text-lg text-gray-700 leading-tight mr-6">Daftar Produk</h2>
+                <h2 class="font-semibold text-lg text-gray-700 leading-tight mr-6">Daftar Pesanan</h2>
                 <div
                     class="group flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-400 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-green-700">
                     <input type="text" name="search" id="search"
                         class="block min-w-0 w-50 grow py-1.5 pr-2 pl-1 text-base text-gray-700 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
-                        placeholder="Cari nama produk" />
+                        placeholder="Masukkan kode pesanan" />
                     <Link>
                     <IconSearch
                         class="mr-2 text-gray-400 group-focus-within:text-green-700 group-hover:text-green-700 transition-colors duration-200"
@@ -42,7 +45,7 @@ const deleteProduct = (id) => {
             </div>
         </template>
 
-        <div class="py-8">
+        <div class="py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-700">
@@ -73,15 +76,15 @@ const deleteProduct = (id) => {
                         </div>
 
                         <div class="flex justify-end items-center mb-4">
-                            <Link v-if="canCreate" :href="route('produk.create')"
+                            <Link v-if="canCreate" :href="route('pesanan.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />
-                            <span>Tambah Produk Baru</span>
+                            <span>Tambah Pesanan Baru</span>
                             </Link>
                         </div>
 
                         <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden shadow">
+                            <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
                                 <thead class="bg-green-50">
                                     <tr>
                                         <th
@@ -89,36 +92,56 @@ const deleteProduct = (id) => {
                                             Kode</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Nama</th>
+                                            Konsumen</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Harga</th>
+                                            Tgl. Pengambilan</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Produksi/Jirangan</th>
-                                        <th v-if="canEdit || canDelete"></th>
+                                            Status</th>
+                                        <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="products.length === 0">
+                                    <tr v-if="orders.length === 0">
                                         <td colspan="6"
                                             class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data produk.
+                                            Belum ada data pesanan.
                                         </td>
                                     </tr>
-                                    <tr v-for="product in products" :key="product.id">
+                                    <tr v-for="order in orders" :key="order.id" :class="{
+                                        'border-b border-gray-200': order.id != orders[orders.length - 1].id,
+                                        'border-none': order.id == orders[orders.length - 1].id
+                                    }">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
-                                            product.code }}</td>
+                                            order.code
+                                            }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                            product.name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                            product.price }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                            product.produce_per_jirangan }}</td>
-                                        <td v-if="canEdit || canDelete" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">                                            
-                                            <Link v-if="canEdit" :href="route('produk.edit', product.id)"
+                                            order.customer.name
+                                            }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {{ new Date(order.date).toLocaleDateString('id-ID') }}
+                                        </td>
+                                        <td class="text-left px-6 whitespace-nowrap text-sm text-gray-700">
+                                            <Link v-if="!order.picked_at"
+                                                :href="route('penjualan.create', { order_id: order.id })"
+                                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-xs text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                            <span>Selesaikan Pesanan</span>
+                                            </Link>
+                                            <div class="flex flex-row items-center" v-else>
+                                                <span class="mr-2">Pesanan diambil</span>
+                                                <IconCircleCheck class="text-green-700" />
+                                            </div>
+                                        </td>
+                                        <td v-if="canEdit || canDelete || canView"
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link v-if="canView" :href="route('pesanan.edit', order.id)"
+                                                class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                            <Link v-if="canEdit && !order.picked_at"
+                                                :href="route('pesanan.edit', order.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteProduct(product.id)"
+                                            <button v-if="canDelete" @click="deleteOrder(order.id)"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
