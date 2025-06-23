@@ -7,6 +7,7 @@ import { IconPlus, IconChevronDown } from '@tabler/icons-vue';
 
 const props = defineProps({
     sale: Object,
+    receivable: Object,
     customers: Array,
     products: Array,
     customerTypes: Array,
@@ -14,7 +15,7 @@ const props = defineProps({
 
 const form = useForm({
     customer_id: props.sale.customer_id,
-    due_date: null,
+    due_date: props.receivable ? props.receivable.due_date : null,
     is_paid: !!props.sale.paid_at,
     details: props.sale.details.map(detail => ({
         id: detail.id,
@@ -96,7 +97,7 @@ const submitForm = () => {
                                     <div class="mb-6">
                                         <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                             Transaksi</label>
-                                        <span class="text-gray-700 text-sm">{{ new Date().toLocaleDateString('id-ID')
+                                        <span class="text-gray-700 text-sm">{{ new Date(sale.created_at).toLocaleDateString('id-ID')
                                             }}</span>
                                     </div>
 
@@ -134,7 +135,7 @@ const submitForm = () => {
                                             Pembayaran</label>
                                         <label class="inline-flex items-center cursor-pointer">
                                             <input type="checkbox" v-model="form.is_paid" id="is_paid"
-                                                class="sr-only peer" :disabled="!form.is_paid">
+                                                class="sr-only peer" :disabled="receivable">
                                             <div
                                                 class="relative w-11 h-6 bg-red-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700">
                                             </div>
@@ -148,7 +149,7 @@ const submitForm = () => {
                                         <label v-if="!form.is_paid" for="due_date"
                                             class="block text-sm font-medium text-gray-700">Jatuh Tempo <span
                                                 class="text-red-500">*</span></label>
-                                        <input type="date" v-if="!form.is_paid" v-model="form.due_date"
+                                        <input type="date" v-if="!form.is_paid" v-model="form.due_date" :disabled="receivable"
                                             class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
                                         <div v-if="form.errors.due_date && !form.is_paid"
                                             class="text-red-600 text-sm mt-1">{{

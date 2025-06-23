@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Receivable extends Model
 {
@@ -21,8 +21,8 @@ class Receivable extends Model
         'due_date',
     ];
 
-    public function sale(): HasOne
+    public function sale(): BelongsTo
     {
-        return $this->hasOne(Sale::class);
+        return $this->belongsTo(Sale::class);
     }
 }

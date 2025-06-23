@@ -14,7 +14,9 @@ import {
     IconChevronLeft,
     IconMenu,
     IconChevronDown,
-    IconChecklist
+    IconChecklist,
+    IconCheese,
+    IconCoins
 } from '@tabler/icons-vue';
 import SidebarMenuItem from '@/Components/SidebarMenuItem.vue';
 
@@ -99,6 +101,10 @@ const logout = () => {
                     <SidebarMenuItem :href="route('penjualan.index')" text="Penjualan" :icon="IconShoppingCart"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('penjualan.*')" />
 
+                    <!-- Piutang -->
+                    <SidebarMenuItem :href="route('piutang.index')" text="Piutang" :icon="IconCoins"
+                        :sidebarExpanded="sidebarExpanded" :isActive="route().current('piutang.*')" />
+
                     <!-- Pembelian -->
                     <SidebarMenuItem :href="route('pembelian.index')" text="Pembelian" :icon="IconHeartHandshake"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('pembelian.*')" />
@@ -106,9 +112,6 @@ const logout = () => {
                     <!-- Stok Bahan Baku -->
                     <SidebarMenuItem :href="route('bahan-baku.index')" text="Stok Bahan Baku" :icon="IconCube"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('bahan-baku.*')" />
-
-                    <!-- Piutang -->
-
 
                     <!-- Laporan -->
 
@@ -128,7 +131,7 @@ const logout = () => {
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('tipe-konsumen.*')" />
 
                     <!-- Produk -->
-                    <SidebarMenuItem :href="route('produk.index')" text="Produk" :icon="IconChefHat"
+                    <SidebarMenuItem :href="route('produk.index')" text="Produk" :icon="IconCheese"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('produk.*')" />
 
                     <!-- Supplier -->
@@ -176,6 +179,10 @@ const logout = () => {
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('penjualan.index')"
                         text="Penjualan" :icon="IconShoppingCart" :isActive="route().current('penjualan.*')" />
 
+                    <!-- Piutang -->
+                    <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('piutang.index')"
+                        text="Piutang" :icon="IconCoins" :isActive="route().current('piutang.*')" />
+
                     <!-- Pembelian -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('pembelian.index')"
                         text="Pembelian" :icon="IconHeartHandshake" :isActive="route().current('pembelian.*')" />
@@ -183,8 +190,6 @@ const logout = () => {
                     <!-- Bahan Baku -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('bahan-baku.index')"
                         text="Stok Bahan Baku" :icon="IconCube" :isActive="route().current('bahan-baku.*')" />
-
-                    <!-- Piutang -->
 
                     <!-- Laporan -->
 
@@ -205,11 +210,11 @@ const logout = () => {
 
                     <!-- Produk  -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('produk.index')"
-                        text="Produk" :icon="IconUsersGroup" :isActive="route().current('produk.*')" />
+                        text="Produk" :icon="IconCheese" :isActive="route().current('produk.*')" />
 
                     <!-- Supplier  -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('pemasok.index')"
-                        text="Pemasok" :icon="IconUsersGroup" :isActive="route().current('pemasok.*')" />
+                        text="Pemasok" :icon="IconTruck" :isActive="route().current('pemasok.*')" />
                 </div>
             </nav>
         </aside>

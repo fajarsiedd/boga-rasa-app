@@ -109,10 +109,7 @@ const deleteOrder = (id) => {
                                             Belum ada data pesanan.
                                         </td>
                                     </tr>
-                                    <tr v-for="order in orders" :key="order.id" :class="{
-                                        'border-b border-gray-200': order.id != orders[orders.length - 1].id,
-                                        'border-none': order.id == orders[orders.length - 1].id
-                                    }">
+                                    <tr v-for="order in orders" :key="order.id">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                             order.code
                                             }}</td>

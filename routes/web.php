@@ -6,6 +6,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ReceivableController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('penjualan', SaleController::class);
     Route::resource('pembelian', PurchaseController::class);
     Route::resource('pesanan', OrderController::class);
+    Route::resource('piutang', ReceivableController::class);
 
     // API
     Route::prefix('api')->group(function () {

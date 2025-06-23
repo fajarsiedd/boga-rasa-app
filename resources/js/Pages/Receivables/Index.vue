@@ -4,19 +4,18 @@ import { computed } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
 
 const props = defineProps({
-    sales: Array,
+    receivables: Array,
 });
 
 const flash = computed(() => usePage().props.flash);
 
-const canView = computed(() => usePage().props.auth.user.can['view-sales']);
-const canCreate = computed(() => usePage().props.auth.user.can['create-sale']);
-const canEdit = computed(() => usePage().props.auth.user.can['edit-sale']);
-const canDelete = computed(() => usePage().props.auth.user.can['delete-sale']);
+const canView = computed(() => usePage().props.auth.user.can['view-receivables']);
+const canEdit = computed(() => usePage().props.auth.user.can['edit-receivable']);
+const canDelete = computed(() => usePage().props.auth.user.can['delete-receivable']);
 
-const deleteSale = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus penjualan ini? Semua detail terkait juga akan dihapus.')) {
-        router.delete(route('penjualan.destroy', id), {
+const deleteReceivable = (id) => {
+    if (confirm('Apakah Anda yakin ingin menghapus piutang ini? Semua detail terkait juga akan dihapus.')) {
+        router.delete(route('piutang.destroy', id), {
             preserveScroll: true,
         });
     }
@@ -26,16 +25,16 @@ const deleteSale = (id) => {
 <template>
     <AuthenticatedLayout>
 
-        <Head title="Daftar Penjualan" />
+        <Head title="Daftar Piutang" />
 
         <template #header>
             <div class="flex flex-row items-center justify-start">
-                <h2 class="font-semibold text-lg text-gray-700 leading-tight mr-6">Daftar Penjualan</h2>
+                <h2 class="font-semibold text-lg text-gray-700 leading-tight mr-6">Daftar Piutang</h2>
                 <div
                     class="group flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-400 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-green-700">
                     <input type="text" name="search" id="search"
                         class="block min-w-0 w-50 grow py-1.5 pr-2 pl-1 text-base text-gray-700 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
-                        placeholder="Masukkan kode penjualan" />
+                        placeholder="Masukkan kode piutang" />
                     <Link>
                     <IconSearch
                         class="mr-2 text-gray-400 group-focus-within:text-green-700 group-hover:text-green-700 transition-colors duration-200"
@@ -70,17 +69,9 @@ const deleteSale = (id) => {
                                 <span class="font-semibold">Error! </span>
                                 <span class="block sm:inline">{{ flash.error }}</span>
                             </div>
-                            <button type="button" @click="() => flash.success = null" class="hover:cursor-pointer">
+                            <button type="button" @click="() => flash.error = null" class="hover:cursor-pointer">
                                 <IconX class="text-gray-700" />
                             </button>
-                        </div>
-
-                        <div class="flex justify-end items-center mb-4">
-                            <Link v-if="canCreate" :href="route('penjualan.create')"
-                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
-                            <IconPlus class="mr-2" size="20" />
-                            <span>Buat Transaksi Penjualan</span>
-                            </Link>
                         </div>
 
                         <div class="overflow-x-auto border border-gray-200 rounded-lg">
@@ -98,38 +89,51 @@ const deleteSale = (id) => {
                                             Total</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Status Pembayaran</th>
+                                            Tgl. Jatuh Tempo</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Tgl. Transaksi</th>
+                                            Tgl. Pembayaran</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Status</th>
                                         <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="sales.length === 0">
+                                    <tr v-if="receivables.length === 0">
                                         <td colspan="6"
                                             class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data penjualan.
+                                            Belum ada data piutang.
                                         </td>
                                     </tr>
-                                    <tr v-for="sale in sales" :key="sale.id">
+                                    <tr v-for="receivable in receivables" :key="receivable.id" :class="{
+                                        'border-b border-gray-200': receivable.id != receivables[receivables.length - 1].id,
+                                        'border-none': receivable.id == receivables[receivables.length - 1].id
+                                    }">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
-                                            sale.code
-                                            }}</td>
+                                            receivable.sale.code
+                                        }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                            sale.customer.name
-                                            }}
+                                            receivable.sale.customer.name
+                                        }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                            sale.total.toLocaleString('id-ID', {
+                                            receivable.sale.total.toLocaleString('id-ID', {
                                                 style: 'currency', currency: 'IDR',
                                                 minimumFractionDigits: 0,
                                                 maximumFractionDigits: 0
                                             })
-                                            }}
+                                        }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {{ new Date(receivable.due_date).toLocaleDateString('id-ID') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {{ receivable.sale.paid_at ? new
+                                                Date(receivable.sale.paid_at).toLocaleDateString('id-ID') : '-' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-xs">
-                                            <div v-if="sale.paid_at"
+                                            <div v-if="receivable.sale.paid_at"
                                                 class="inline px-4 py-1 rounded-full bg-green-100 uppercase text-green-600 outline outline-green-600 text-center font-semibold">
                                                 Lunas
                                             </div>
@@ -138,15 +142,13 @@ const deleteSale = (id) => {
                                                 Ditunda
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
-                                        </td>
-                                        <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link v-if="canView" :href="route('penjualan.edit', sale.id)"
+                                        <td v-if="canEdit || canDelete || canView"
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link v-if="canView" :href="route('piutang.edit', receivable.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
-                                            <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
+                                            <Link v-if="canEdit" :href="route('piutang.edit', receivable.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteSale(sale.id)"
+                                            <button v-if="canDelete" @click="deleteReceivable(receivable.id)"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>

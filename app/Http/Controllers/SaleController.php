@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\CustomerType;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Receivable;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -105,7 +106,7 @@ class SaleController extends Controller
                 $total += $subtotal;
             }
 
-            $paidAtValue = $request->boolean('is_paid') ? now() : null;
+            $paidAtValue = $request->boolean('is_paid') ? Carbon::now() : null;
 
             $sale = Sale::create([
                 'code' => $code,
@@ -129,6 +130,13 @@ class SaleController extends Controller
 
                 $order->picked_at = Carbon::now();
                 $order->save();
+            }
+
+            if (!$paidAtValue) {
+                Receivable::create([
+                    'sale_id' => $sale->id,
+                    'due_date' => $request->due_date
+                ]);
             }
 
             DB::commit();
@@ -167,8 +175,14 @@ class SaleController extends Controller
         $products = Product::orderBy('name')->get();
         $customerTypes = CustomerType::all();
 
+        $receivable = Receivable::where('sale_id', $id)->first();
+        if ($receivable) {
+            $receivable->due_date = Carbon::parse($receivable->due_date)->setTimezone(config('app.timezone'))->format('Y-m-d');
+        }
+
         return Inertia::render('Sales/Edit', [
             'sale' => $sale,
+            'receivable' => $receivable,
             'customers' => $customers,
             'products' => $products,
             'customerTypes' => $customerTypes
@@ -188,7 +202,7 @@ class SaleController extends Controller
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
             'details.*.qty' => 'required|integer|min:1',
-            'details.*.final_price' => 'required|numeric|min:0', // final_price diterima dari frontend            
+            'details.*.final_price' => 'required|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -215,7 +229,7 @@ class SaleController extends Controller
                 $total += $subtotal;
             }
 
-            $paidAtValue = $request->boolean('is_paid') ? now() : null;
+            $paidAtValue = $request->boolean('is_paid') ? Carbon::now() : null;
 
             $sale->update([
                 'customer_id' => $request->customer_id,
@@ -227,6 +241,17 @@ class SaleController extends Controller
 
             foreach ($saleDetails as $detail) {
                 $sale->details()->create($detail);
+            }
+
+            if (!$paidAtValue) {
+                $receivable = Receivable::where('sale_id', $sale->id)->first();
+
+                if (!$receivable) {
+                    Receivable::create([
+                        'sale_id' => $sale->id,
+                        'due_date' => $request->due_date
+                    ]);
+                }
             }
 
             DB::commit();
