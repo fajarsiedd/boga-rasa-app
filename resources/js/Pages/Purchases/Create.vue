@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import PurchaseDetailRow from '@/Components/PurchaseDetailRow.vue';
 import AddSupplierModal from '@/Components/AddSupplierModal.vue';
-import { IconPlus, IconChevronDown } from '@tabler/icons-vue';
+import { IconPlus, IconChevronDown, IconTrash } from '@tabler/icons-vue';
 
 const props = defineProps({
     suppliers: Array,
@@ -20,6 +20,7 @@ const form = useForm({
 
 const showAddSupplierModal = ref(false);
 const selectableSuppliers = ref([...props.suppliers]);
+const fileInput = ref(null);
 
 const grandTotal = computed(() => {
     return form.details.reduce((sum, detail) => sum + (detail.subtotal || 0), 0);
@@ -41,6 +42,17 @@ const handleNewSupplierAdded = (newSupplier) => {
 
 const handleImageUpload = (event) => {
     form.receipt_image = event.target.files[0];
+};
+
+const openFileInput = () => {
+    fileInput.value.click();
+};
+
+const removeImage = () => {
+    form.receipt_image = null;
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
 };
 
 const submitForm = () => {
@@ -98,18 +110,43 @@ const submitForm = () => {
                                     </div>
                                     <div v-if="form.errors.supplier_id" class="text-red-600 text-sm mt-1">{{
                                         form.errors.supplier_id
-                                    }}</div>
-                                </div>
+                                        }}</div>
+                                </div>                        
 
                                 <div>
-                                    <label for="receipt_image" class="block text-sm font-medium text-gray-700">Nota
-                                        Pembelian
-                                        (Opsional)</label>
-                                    <input id="receipt_image" type="file" @change="handleImageUpload"
-                                        class="mt-1 block w-full h-10 text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                                        accept="image/*" />
-                                    <div v-if="form.errors.receipt_image" class="text-red-600 text-sm mt-1">{{
-                                        form.errors.receipt_image }}</div>
+                                    <label for="receipt_image" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nota Pembelian (Opsional)
+                                    </label>
+
+                                    <div class="flex flex-row items-center justify-center">
+                                        <div
+                                            class="relative flex w-full group items-center border border-gray-300 rounded-lg pr-2 h-10 overflow-hidden">
+                                            <button type="button" @click="openFileInput"
+                                                class="flex-shrink-0 bg-green-700 group-hover:bg-green-900 cursor-pointer text-white text-sm font-semibold py-2 px-4 rounded-l-lg transition duration-150 ease-in-out h-full">
+                                                Pilih File
+                                            </button>
+
+                                            <span class="ml-3 text-sm text-gray-700 truncate" v-if="form.receipt_image">
+                                                {{ form.receipt_image.name }}
+                                            </span>
+                                            <span class="ml-3 text-sm text-gray-400" v-else>
+                                                Belum ada file dipilih
+                                            </span>
+
+                                            <input id="receipt_image" ref="fileInput" type="file"
+                                                @change="handleImageUpload"
+                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                accept="image/*" />
+                                        </div>
+                                        <button v-if="form.receipt_image" type="button" @click="removeImage"
+                                            class="ml-2 text-red-600 hover:text-red-800 hover:cursor-pointer text-sm">
+                                            <IconTrash />
+                                        </button>
+                                    </div>
+
+                                    <div v-if="form.errors.receipt_image" class="text-red-600 text-sm mt-1">
+                                        {{ form.errors.receipt_image }}
+                                    </div>
                                 </div>
                             </div>
 
@@ -130,10 +167,11 @@ const submitForm = () => {
                             <div class="text-right mt-8">
                                 <h4 class="text-2xl font-bold text-gray-800">Total: {{
                                     grandTotal.toLocaleString('id-ID', {
-                                        style: 'currency', currency: 'IDR'
+                                        style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
                                     }) }}</h4>
                                 <div v-if="form.errors.total" class="text-red-600 text-sm mt-1">{{ form.errors.total
-                                    }}
+                                }}
                                 </div>
                             </div>
 

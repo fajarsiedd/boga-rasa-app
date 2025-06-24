@@ -153,7 +153,7 @@ class PurchaseController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $this->authorize('edit-purchase');        
+        $this->authorize('edit-purchase');                
 
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
