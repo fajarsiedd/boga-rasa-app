@@ -98,9 +98,6 @@ const deletePurchase = (id) => {
                                             Total</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Bukti Pembayaran</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Tgl. Transaksi</th>
                                         <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
@@ -117,7 +114,7 @@ const deletePurchase = (id) => {
                                             purchase.code }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                             purchase.supplier.name
-                                        }}</td>
+                                            }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                             purchase.total.toLocaleString('id-ID', {
                                                 style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
@@ -126,14 +123,10 @@ const deletePurchase = (id) => {
                                         }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            <a v-if="purchase.receipt_image" :href="'storage/' + purchase.receipt_image"
-                                                target="_blank" class="text-green-700 font-medium hover:underline">Lihat Bukti</a>
-                                            <span v-else>-</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {{ new Date(purchase.created_at).toLocaleDateString('id-ID') }}
                                         </td>
-                                        <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td v-if="canEdit || canDelete || canView"
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canView" :href="route('pembelian.edit', purchase.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('pembelian.edit', purchase.id)"

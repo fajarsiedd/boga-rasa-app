@@ -95,13 +95,13 @@ const deleteSale = (id) => {
                                             Konsumen</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Total</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Status Pembayaran</th>
+                                            Total</th>                                        
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Tgl. Transaksi</th>
+                                            <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                            Status Pembayaran</th>
                                         <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
@@ -128,6 +128,9 @@ const deleteSale = (id) => {
                                             })
                                             }}
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-xs">
                                             <div v-if="sale.paid_at"
                                                 class="inline px-4 py-1 rounded-full bg-green-100 uppercase text-green-600 outline outline-green-600 text-center font-semibold">
@@ -138,16 +141,13 @@ const deleteSale = (id) => {
                                                 Ditunda
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
-                                        </td>
                                         <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canView" :href="route('penjualan.edit', sale.id)"
-                                                class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                            class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
-                                                class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
+                                            class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                             <button v-if="canDelete" @click="deleteSale(sale.id)"
-                                                class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
+                                            class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
                                 </tbody>

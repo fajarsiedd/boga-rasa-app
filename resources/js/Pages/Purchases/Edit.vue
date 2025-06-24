@@ -183,7 +183,7 @@ const submitForm = () => {
                             <button type="button" @click="addMaterialDetail"
                                 class="inline-flex items-center justify-center p-4 bg-white w-full rounded-md font-semibold text-xs text-gray-500 border border-gray-400 border-dashed uppercase tracking-widest hover:bg-gray-50 hover:text-green-700 hover:cursor-pointer focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
                                 <IconPlus class="mr-2" size="20" />
-                                Tambah Bahan Baku
+                                Tambah Detail Pembelian
                             </button>
 
                             <div class="text-right mt-8">

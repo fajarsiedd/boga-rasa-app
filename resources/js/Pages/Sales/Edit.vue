@@ -80,10 +80,12 @@ const submitForm = () => {
 
 <template>
     <AuthenticatedLayout>
+
         <Head title="Edit Transaksi Penjualan" />
 
         <template #header>
-            <h2 class="font-semibold text-lg text-gray-700 leading-tight">Edit Transaksi Penjualan - {{ sale.code }}</h2>
+            <h2 class="font-semibold text-lg text-gray-700 leading-tight">Edit Transaksi Penjualan - {{ sale.code }}
+            </h2>
         </template>
 
         <div class="py-8 bg-gray-50">
@@ -97,7 +99,8 @@ const submitForm = () => {
                                     <div class="mb-6">
                                         <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                             Transaksi</label>
-                                        <span class="text-gray-700 text-sm">{{ new Date(sale.created_at).toLocaleDateString('id-ID')
+                                        <span class="text-gray-700 text-sm">{{ new
+                                            Date(sale.created_at).toLocaleDateString('id-ID')
                                             }}</span>
                                     </div>
 
@@ -141,7 +144,7 @@ const submitForm = () => {
                                             </div>
                                             <span class="ml-3 text-sm text-gray-700">{{ form.is_paid ? 'Lunas' :
                                                 'Ditunda'
-                                                }}</span>
+                                            }}</span>
                                         </label>
                                     </div>
 
@@ -149,7 +152,8 @@ const submitForm = () => {
                                         <label v-if="!form.is_paid" for="due_date"
                                             class="block text-sm font-medium text-gray-700">Jatuh Tempo <span
                                                 class="text-red-500">*</span></label>
-                                        <input type="date" v-if="!form.is_paid" v-model="form.due_date" :disabled="receivable"
+                                        <input type="date" v-if="!form.is_paid" v-model="form.due_date"
+                                            :disabled="receivable"
                                             class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
                                         <div v-if="form.errors.due_date && !form.is_paid"
                                             class="text-red-600 text-sm mt-1">{{
@@ -172,7 +176,7 @@ const submitForm = () => {
                             <button type="button" @click="addProductDetail"
                                 class="inline-flex items-center justify-center p-4 bg-white w-full rounded-md font-semibold text-xs text-gray-500 border border-gray-400 border-dashed uppercase tracking-widest hover:bg-gray-50 hover:text-green-700 hover:cursor-pointer focus:outline-none disabled:opacity-25 transition ease-in-out duration-150">
                                 <IconPlus class="mr-2" size="20" />
-                                Tambah Produk
+                                Tambah Detail Penjualan
                             </button>
 
                             <div class="text-right mt-8">
