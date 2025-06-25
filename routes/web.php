@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerTypeController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Controllers\SaleController;
@@ -17,7 +18,7 @@ Route::get('/')->middleware('redirect.auth.guest');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
-    })->name('dashboard');
+    })->name('dashboard');    
 
     // Resources
     Route::resource('tipe-konsumen', CustomerTypeController::class);
@@ -29,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pembelian', PurchaseController::class);
     Route::resource('pesanan', OrderController::class);
     Route::resource('piutang', ReceivableController::class);
+    Route::resource('produksi', ProductionController::class);
 
     // API
     Route::prefix('api')->group(function () {

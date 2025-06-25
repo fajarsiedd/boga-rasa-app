@@ -41,7 +41,7 @@ const handleNewCustomerAdded = (newCustomer) => {
 };
 
 const submitForm = () => {
-    form.post(route('pesanan.store'), {
+    form.put(route('pesanan.update', props.order.id), {
         onSuccess: () => {
             form.reset();
             form.details = [{ product_id: '', qty: 1, final_price: 0, subtotal: 0 }];

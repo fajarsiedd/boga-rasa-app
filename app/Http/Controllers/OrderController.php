@@ -143,7 +143,7 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::find($id);
+            $order = Order::with('details')->find($id);
 
             if ($order->picked_at) {
                 return redirect()->route('pesanan.index')
@@ -156,7 +156,7 @@ class OrderController extends Controller
                 'date' => $request->date
             ]);
 
-            $order->details->delete();
+            $order->details()->delete();
 
             foreach ($request->details as $detail) {
                 $order->details()->create($detail);

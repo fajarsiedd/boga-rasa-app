@@ -93,6 +93,10 @@ const logout = () => {
                     <h3 v-if="sidebarExpanded" class="text-xs uppercase text-gray-700 px-3 mb-2">Menu Utama</h3>
                     <h3 v-else class="text-xs uppercase text-gray-700 text-center mb-2">...</h3>
 
+                    <!-- Produksi -->
+                    <SidebarMenuItem :href="route('produksi.index')" text="Produksi" :icon="IconChefHat"
+                        :sidebarExpanded="sidebarExpanded" :isActive="route().current('produksi.*')" />
+
                     <!-- Pesanan -->
                     <SidebarMenuItem :href="route('pesanan.index')" text="Pesanan" :icon="IconChecklist"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('pesanan.*')" />
@@ -170,6 +174,10 @@ const logout = () => {
                 <!-- Menu Utama -->
                 <div class="pt-4 border-t border-gray-300 mt-4">
                     <h3 class="text-xs uppercase text-gray-700 px-3 mb-2">Menu Utama</h3>
+
+                    <!-- Produksi -->
+                    <SidebarMenuItem :href="route('produksi.index')" text="Produksi" :icon="IconChefHat"
+                        :sidebarExpanded="sidebarExpanded" :isActive="route().current('produksi.*')" />
 
                     <!-- Pesanan -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('pesanan.index')"
