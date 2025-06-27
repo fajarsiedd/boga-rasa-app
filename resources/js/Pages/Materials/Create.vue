@@ -21,7 +21,7 @@ const submit = () => {
         <Head title="Tambah Bahan Baku Baru" />
 
         <template #header>
-            <h2 class="font-semibold text-lg text-gray-700 leading-tight">Tambah Baan Baku Baru</h2>
+            <h2 class="font-semibold text-lg text-gray-700 leading-tight">Tambah Bahan Baku Baru</h2>
         </template>
 
         <div class="py-8">
@@ -30,7 +30,7 @@ const submit = () => {
                     <div class="p-6 text-gray-900">
                         <form @submit.prevent="submit">
                             <div class="mb-4">
-                                <label for="name" class="block text-sm font-medium text-gray-700">Nama Konsumen
+                                <label for="name" class="block text-sm font-medium text-gray-700">Nama Bahan Baku
                                     <span class="text-red-500">*</span></label>
                                 <input id="name" type="text"
                                     class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"

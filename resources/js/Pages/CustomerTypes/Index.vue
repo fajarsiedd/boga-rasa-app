@@ -74,7 +74,7 @@ const deleteCustomerType = (id) => {
                             </button>
                         </div>
 
-                        <div class="flex justify-end items-center mb-4">
+                        <div v-if="customerTypes.length > 0" class="flex justify-end items-center mb-4">
                             <Link v-if="canCreate" :href="route('tipe-konsumen.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />
@@ -82,7 +82,24 @@ const deleteCustomerType = (id) => {
                             </Link>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div v-if="customerTypes.length === 0"
+                            class="w-full p-10 flex flex-col items-center justify-center text-gray-700">
+                            <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
+                                <img src="/public/assets/empty-state.png" alt="" srcset="">
+                            </div>
+                            <p class="font-semibold mb-2">Belum ada data tipe konsumen</p>
+                            <p class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk menambahkan
+                                data
+                                baru.</p>
+                            <Link v-if="canCreate" :href="route('tipe-konsumen.create')"
+                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <IconPlus class="mr-2" size="20" />
+                            <span>Tambah Tipe Konsumen Baru</span>
+                            </Link>
+                        </div>
+
+
+                        <div v-else class="overflow-x-auto border border-gray-200 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden shadow">
                                 <thead class="bg-green-50">
                                     <tr>
@@ -96,12 +113,6 @@ const deleteCustomerType = (id) => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="customerTypes.length === 0">
-                                        <td colspan="4"
-                                            class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data tipe konsumen.
-                                        </td>
-                                    </tr>
                                     <tr v-for="customer_type in customerTypes" :key="customer_type.id">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                             customer_type.name }}</td>
@@ -109,7 +120,8 @@ const deleteCustomerType = (id) => {
                                             customer_type.discount ||
                                             '-'
                                         }}</td>
-                                        <td v-if="canEdit || canDelete" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">                                            
+                                        <td v-if="canEdit || canDelete"
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canEdit" :href="route('tipe-konsumen.edit', customer_type.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                             <button v-if="canDelete" @click="deleteCustomerType(customer_type.id)"

@@ -75,7 +75,7 @@ const deletePurchase = (id) => {
                             </button>
                         </div>
 
-                        <div class="flex justify-end items-center mb-4">
+                        <div v-if="purchases.length > 0" class="flex justify-end items-center mb-4">
                             <Link v-if="canCreate" :href="route('pembelian.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />
@@ -83,7 +83,24 @@ const deletePurchase = (id) => {
                             </Link>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div v-if="purchases.length === 0"
+                            class="w-full p-10 flex flex-col items-center justify-center text-gray-700">
+                            <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
+                                <img src="/public/assets/empty-state.png" alt="" srcset="">
+                            </div>
+                            <p class="font-semibold mb-2">Belum ada transaksi pembelian hari ini</p>
+                            <p class="text-sm text-center text-gray-500 mb-4">Klik tombol buat transaksi untuk
+                                menambahkan
+                                data
+                                baru.</p>
+                            <Link v-if="canCreate" :href="route('pembelian.create')"
+                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <IconPlus class="mr-2" size="20" />
+                            <span>Buat Transaksi Pembelian</span>
+                            </Link>
+                        </div>
+
+                        <div v-else class="overflow-x-auto border border-gray-200 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
                                 <thead class="bg-green-50">
                                     <tr>
@@ -103,18 +120,12 @@ const deletePurchase = (id) => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="purchases.length === 0">
-                                        <td colspan="7"
-                                            class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data pembelian.
-                                        </td>
-                                    </tr>
                                     <tr v-for="purchase in purchases" :key="purchase.id">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                             purchase.code }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                             purchase.supplier.name
-                                            }}</td>
+                                        }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                             purchase.total.toLocaleString('id-ID', {
                                                 style: 'currency', currency: 'IDR', minimumFractionDigits: 0,

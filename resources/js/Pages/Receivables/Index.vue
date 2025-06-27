@@ -74,7 +74,18 @@ const deleteReceivable = (id) => {
                             </button>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div v-if="receivables.length === 0"
+                            class="w-full p-10 flex flex-col items-center justify-center text-gray-700">
+                            <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
+                                <img src="/public/assets/empty-state.png" alt="" srcset="">
+                            </div>
+                            <p class="font-semibold mb-2">Belum ada data piutang</p>
+                            <p class="text-sm text-center text-gray-500 mb-4">Penjualan dengan pembayaran ditunda
+                                akan
+                                ditampilkan disini.</p>
+                        </div>
+
+                        <div v-else class="overflow-x-auto border border-gray-200 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
                                 <thead class="bg-green-50">
                                     <tr>
@@ -100,12 +111,6 @@ const deleteReceivable = (id) => {
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="receivables.length === 0">
-                                        <td colspan="6"
-                                            class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data piutang.
-                                        </td>
-                                    </tr>
                                     <tr v-for="receivable in receivables" :key="receivable.id" :class="{
                                         'border-b border-gray-200': receivable.id != receivables[receivables.length - 1].id,
                                         'border-none': receivable.id == receivables[receivables.length - 1].id

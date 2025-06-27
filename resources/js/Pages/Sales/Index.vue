@@ -75,7 +75,7 @@ const deleteSale = (id) => {
                             </button>
                         </div>
 
-                        <div class="flex justify-end items-center mb-4">
+                        <div v-if="sales.length > 0" class="flex justify-end items-center mb-4">
                             <Link v-if="canCreate" :href="route('penjualan.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />
@@ -83,7 +83,24 @@ const deleteSale = (id) => {
                             </Link>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div v-if="sales.length === 0"
+                            class="w-full p-10 flex flex-col items-center justify-center text-gray-700">
+                            <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
+                                <img src="/public/assets/empty-state.png" alt="" srcset="">
+                            </div>
+                            <p class="font-semibold mb-2">Belum ada transaksi penjualan hari ini</p>
+                            <p class="text-sm text-center text-gray-500 mb-4">Klik tombol buat transaksi untuk
+                                menambahkan
+                                data
+                                baru.</p>
+                            <Link v-if="canCreate" :href="route('penjualan.create')"
+                                class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <IconPlus class="mr-2" size="20" />
+                            <span>Buat Transaksi Penjualan</span>
+                            </Link>
+                        </div>
+
+                        <div v-else class="overflow-x-auto border border-gray-200 rounded-lg">
                             <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
                                 <thead class="bg-green-50">
                                     <tr>
@@ -95,23 +112,17 @@ const deleteSale = (id) => {
                                             Konsumen</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                            Total</th>                                        
+                                            Total</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Tgl. Transaksi</th>
-                                            <th
+                                        <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                             Status Pembayaran</th>
                                         <th v-if="canEdit || canDelete || canView"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-if="sales.length === 0">
-                                        <td colspan="6"
-                                            class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                                            Belum ada data penjualan.
-                                        </td>
-                                    </tr>
                                     <tr v-for="sale in sales" :key="sale.id">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                             sale.code
@@ -126,7 +137,7 @@ const deleteSale = (id) => {
                                                 minimumFractionDigits: 0,
                                                 maximumFractionDigits: 0
                                             })
-                                            }}
+                                        }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
@@ -141,13 +152,14 @@ const deleteSale = (id) => {
                                                 Ditunda
                                             </div>
                                         </td>
-                                        <td v-if="canEdit || canDelete || canView" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td v-if="canEdit || canDelete || canView"
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canView" :href="route('penjualan.edit', sale.id)"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                                class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
+                                                class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                             <button v-if="canDelete" @click="deleteSale(sale.id)"
-                                            class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
+                                                class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
                                 </tbody>

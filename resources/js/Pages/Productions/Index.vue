@@ -4,6 +4,7 @@ import { IconArrowsMaximize, IconArrowsMinimize, IconUser, IconCircleCheckFilled
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { IconPlus } from '@tabler/icons-vue';
 
 const props = defineProps({
     production: Object,
@@ -16,6 +17,7 @@ const form = useForm({
 });
 
 const flash = computed(() => usePage().props.flash);
+const canCreate = computed(() => usePage().props.auth.user.can['create-order']);
 
 const contentContainer = ref(null);
 const isFullscreen = ref(false);
@@ -156,8 +158,21 @@ onUnmounted(() => {
                                     </ul>
                                 </div>
                             </div>
-                            <div v-else class="bg-gray-50 p-6 rounded-lg text-center text-gray-500">
-                                Tidak ada pesanan untuk tanggal ini.
+                            <div v-if="orders.length === 0"
+                                class="w-full h-full p-10 flex flex-col items-center justify-center text-gray-700">
+                                <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
+                                    <img src="/public/assets/empty-state.png" alt="" srcset="">
+                                </div>
+                                <p class="font-semibold mb-2">Belum ada pesanan untuk tanggal ini</p>
+                                <p class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk
+                                    menambahkan
+                                    data
+                                    baru.</p>
+                                <Link v-if="canCreate" :href="route('pesanan.create')"
+                                    class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                <IconPlus class="mr-2" size="20" />
+                                <span>Tambah Pesanan Baru</span>
+                                </Link>
                             </div>
                         </div>
                         <div class="flex flex-col">
