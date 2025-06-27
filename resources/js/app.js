@@ -6,15 +6,16 @@ import AuthenticatedLayout from '../../resources/js/Layouts/AuthenticatedLayout.
 
 createInertiaApp({
   resolve: name => {
-    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })    
-    return pages[`./Pages/${name}.vue`]
+    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
+    let page = pages[`./Pages/${name}.vue`]
+    page.default.layout = name.startsWith('Auth/') ? undefined : AuthenticatedLayout
+    return page
   },
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(ZiggyVue)
-
-      .component('AuthenticatedLayout', AuthenticatedLayout)
+      
       .component('Head', Head)
       .component('Link', Link)      
 

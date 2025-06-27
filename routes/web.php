@@ -17,8 +17,10 @@ Route::get('/')->middleware('redirect.auth.guest');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');    
+        return Inertia::render('Dashboard', [
+            'title' => 'Dashboard'
+        ]);
+    })->name('dashboard');
 
     // Resources
     Route::resource('tipe-konsumen', CustomerTypeController::class);

@@ -19,6 +19,7 @@ class ProductController extends Controller
         $products = Product::all();
 
         return Inertia::render('Products/Index', [
+            'title' => 'Daftar Produk',
             'products' => $products
         ]);
     }
@@ -87,6 +88,7 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         return Inertia::render('Products/Edit', [
+            'title' => 'Edit Produk - ' + $product->name,
             'product' => $product
         ]);
     }

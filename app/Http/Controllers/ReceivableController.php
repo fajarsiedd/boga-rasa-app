@@ -20,6 +20,7 @@ class ReceivableController extends Controller
         $receivables = Receivable::with('sale.customer')->orderBy('due_date', 'asc')->get();
 
         return Inertia::render('Receivables/Index', [
+            'title' => 'Daftar Piutang',
             'receivables' => $receivables
         ]);
     }
@@ -59,6 +60,7 @@ class ReceivableController extends Controller
         $receivable->due_date = Carbon::parse($receivable->due_date)->setTimezone(config('app.timezone'))->format('Y-m-d');
 
         return Inertia::render('Receivables/Edit', [
+            'title' => 'Edit Piutang - ' + $receivable->sale->code,
             'receivable' => $receivable
         ]);
     }

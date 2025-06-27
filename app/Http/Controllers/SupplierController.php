@@ -19,6 +19,7 @@ class SupplierController extends Controller
         $suppliers = Supplier::all();
 
         return Inertia::render('Suppliers/Index', [
+            'title' => 'Daftar Pemasok',
             'suppliers' => $suppliers
         ]);
     }
@@ -30,7 +31,9 @@ class SupplierController extends Controller
     {
         $this->authorize('create-supplier');
 
-        return Inertia::render('Suppliers/Create');
+        return Inertia::render('Suppliers/Create', [
+            'title' => 'Tambah Pemasok Baru'
+        ]);
     }
 
     /**
@@ -118,6 +121,7 @@ class SupplierController extends Controller
         $supplier = Supplier::find($id);
 
         return Inertia::render('Suppliers/Edit', [
+            'title' => 'Edit Pemasok - ' + $supplier->name,
             'supplier' => $supplier
         ]);
     }

@@ -19,6 +19,7 @@ class CustomerTypeController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('CustomerTypes/Index', [
+            'title' => 'Daftar Tipe Konsumen',
             'customerTypes' => $customerTypes
         ]);
     }
@@ -30,7 +31,9 @@ class CustomerTypeController extends Controller
     {
         $this->authorize('create-customer-type');
 
-        return Inertia::render('CustomerTypes/Create');
+        return Inertia::render('CustomerTypes/Create', [
+            'title' => 'Tambah Tipe Konsumen Baru'
+        ]);
     }
 
     /**
@@ -83,6 +86,7 @@ class CustomerTypeController extends Controller
         $customerType = CustomerType::find($id);
 
         return Inertia::render('CustomerTypes/Edit', [
+            'title' => 'Edit Tipe Konsumen - ' + $customerType->name, 
             'customerType' => $customerType
         ]);
     }

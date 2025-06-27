@@ -22,6 +22,7 @@ class PurchaseController extends Controller
         $purchases = Purchase::with('details.material', 'supplier')->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('Purchases/Index', [
+            'title' => 'Daftar Transaksi Pembelian',
             'purchases' => $purchases
         ]);
     }
@@ -37,6 +38,7 @@ class PurchaseController extends Controller
         $materials = Material::orderBy('name')->get();
 
         return Inertia::render('Purchases/Create', [
+            'title' => 'Buat Transaksi Pembelian',
             'suppliers' => $suppliers,
             'materials' => $materials
         ]);
@@ -142,6 +144,7 @@ class PurchaseController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
 
         return Inertia::render('Purchases/Edit', [
+            'title' => 'Edit Transaksi Pembelian - ' + $purchase->code,
             'purchase' => $purchase,
             'materials' => $materials,
             'suppliers' => $suppliers

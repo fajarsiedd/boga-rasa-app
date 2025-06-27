@@ -20,6 +20,7 @@ class CustomerController extends Controller
         $customers = Customer::with('customerType')->orderBy('name')->get();
 
         return Inertia::render('Customers/Index', [
+            'title' => 'Daftar Konsumen',
             'customers' => $customers
         ]);
     }
@@ -34,6 +35,7 @@ class CustomerController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('Customers/Create', [
+            'title' => 'Tambah Konsumen Baru',
             'customerTypes' => $customerTypes
         ]);
     }
@@ -130,6 +132,7 @@ class CustomerController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('Customers/Edit', [
+            'title' => 'Edit Konsumen - ' + $customer->name,
             'customer' => $customer,
             'customerTypes' => $customerTypes
         ]);

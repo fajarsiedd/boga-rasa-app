@@ -25,6 +25,7 @@ class SaleController extends Controller
         $sales = Sale::with('details.product', 'customer')->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('Sales/Index', [
+            'title' => 'Daftar Transaksi Penjualan',
             'sales' => $sales
         ]);
     }
@@ -51,6 +52,7 @@ class SaleController extends Controller
         $products = Product::orderBy('name')->get();
 
         return Inertia::render('Sales/Create', [
+            'title' => 'Buat Transaksi Penjualan',
             'order' => $order,
             'customers' => $customers,
             'customerTypes' => $customerTypes,
@@ -181,6 +183,7 @@ class SaleController extends Controller
         }
 
         return Inertia::render('Sales/Edit', [
+            'title' => 'Edit Transaksi Penjualan - ' + $sale->code,
             'sale' => $sale,
             'receivable' => $receivable,
             'customers' => $customers,

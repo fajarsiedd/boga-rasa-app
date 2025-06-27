@@ -45,6 +45,7 @@ class ProductionController extends Controller
         }
 
         return Inertia::render('Productions/Index', [
+            'title' => 'Produksi',
             'production' => $production,
             'orders' => $orders
         ]);

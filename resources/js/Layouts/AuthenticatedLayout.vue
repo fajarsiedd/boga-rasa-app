@@ -26,6 +26,7 @@ const dropdownOpen = ref(false);
 const dropdownRef = ref(null);
 
 const user = computed(() => usePage().props.auth.user);
+const title = computed(() => usePage().props.title);
 
 const isOwner = computed(() => user.value && user.value.role === 'owner');
 const isAdmin = computed(() => user.value && user.value.role === 'admin');
@@ -238,7 +239,7 @@ const logout = () => {
                 </button>
 
                 <div class="flex-1">
-                    <slot name="header" />
+                    <h2 class="font-semibold text-lg text-gray-700 leading-tight">{{ title }}</h2>
                 </div>
 
                 <div class="relative" ref="dropdownRef">

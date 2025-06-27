@@ -19,6 +19,7 @@ class MaterialController extends Controller
         $materials = Material::all();
 
         return Inertia::render('Materials/Index', [
+            'title' => 'Daftar Bahan Baku',
             'materials' => $materials
         ]);
     }
@@ -30,7 +31,9 @@ class MaterialController extends Controller
     {
         $this->authorize('create-material');
 
-        return Inertia::render('Materials/Create');
+        return Inertia::render('Materials/Create', [
+            'title' => 'Tambah Bahan Baku Baru'
+        ]);
     }
 
     /**
@@ -85,6 +88,7 @@ class MaterialController extends Controller
         $material = Material::find($id);        
 
         return Inertia::render('Materials/Edit', [
+            'title' => 'Edit Bahan Baku - ' + $material->name,
             'material' => $material
         ]);
     }

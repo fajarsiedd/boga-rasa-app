@@ -23,6 +23,7 @@ class OrderController extends Controller
         $orders = Order::with('customer')->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('Orders/Index', [
+            'title' => 'Daftar Pesanan',
             'orders' => $orders
         ]);
     }
@@ -39,6 +40,7 @@ class OrderController extends Controller
         $products = Product::orderBy('name')->get();
 
         return Inertia::render('Orders/Create', [
+            'title' => 'Tambah Pesanan Baru',
             'customers' => $customers,
             'customerTypes' => $customerTypes,
             'products' => $products
@@ -118,6 +120,7 @@ class OrderController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('Orders/Edit', [
+            'title' => 'Edit Pesanan - ' + $order->code,
             'order' => $order,
             'customers' => $customers,
             'products' => $products,
