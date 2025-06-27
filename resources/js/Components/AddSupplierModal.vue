@@ -28,8 +28,7 @@ const submitForm = async () => {
         if (response.data.success) {
             emit('supplierAdded', response.data.data);
             emit('close');
-            form.reset();
-            alert(response.data.message);
+            form.reset();            
         } else {
             alert(response.data.message || 'Gagal menambahkan supplier.');
         }

@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     products: Array,
@@ -13,10 +14,11 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-product']
 const canEdit = computed(() => usePage().props.auth.user.can['edit-product']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-product']);
 
-const deleteProduct = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-        router.delete(route('produk.destroy', id));
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteProduct = () => {
+    router.delete(route('produk.destroy', selectedId.value));
 };
 </script>
 
@@ -129,7 +131,8 @@ const deleteProduct = (id) => {
                                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canEdit" :href="route('produk.edit', product.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteProduct(product.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = product.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -140,5 +143,8 @@ const deleteProduct = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteProduct"
+            title="Hapus Data Produk" subtitle="Apakah anda yakin ingin menghapus data produk ini?" />
     </AuthenticatedLayout>
 </template>

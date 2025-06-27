@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     customerTypes: Array,
@@ -13,12 +14,13 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-customer-
 const canEdit = computed(() => usePage().props.auth.user.can['edit-customer-type']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-customer-type']);
 
-const deleteCustomerType = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus tipe konsumen ini?')) {
-        router.delete(route('tipe-konsumen.destroy', id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteCustomerType = () => {
+    router.delete(route('tipe-konsumen.destroy', selectedId.value), {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -124,7 +126,8 @@ const deleteCustomerType = (id) => {
                                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canEdit" :href="route('tipe-konsumen.edit', customer_type.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteCustomerType(customer_type.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = customer_type.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -135,5 +138,8 @@ const deleteCustomerType = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteCustomerType"
+            title="Hapus Data Tipe Konsumen" subtitle="Apakah anda yakin ingin menghapus data tipe konsumen ini?" />
     </AuthenticatedLayout>
 </template>

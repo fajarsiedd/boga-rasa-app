@@ -31,8 +31,7 @@ const submitForm = async () => {
         if (response.data.success) {
             emit('customerAdded', response.data.data);
             emit('close');
-            form.reset();
-            alert(response.data.message);
+            form.reset();            
         } else {
             alert(response.data.message || 'Gagal menambahkan customer.');
         }

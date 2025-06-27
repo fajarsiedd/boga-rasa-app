@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     purchases: Array
@@ -14,12 +15,13 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-purchase'
 const canEdit = computed(() => usePage().props.auth.user.can['edit-purchase']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-purchase']);
 
-const deletePurchase = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus pembelian ini? Semua detail terkait dan perubahan stok bahan baku akan dikembalikan.')) {
-        router.delete(route('pembelian.destroy', id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deletePurchase = () => {
+    router.delete(route('pembelian.destroy', selectedId.value), {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -142,7 +144,8 @@ const deletePurchase = (id) => {
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('pembelian.edit', purchase.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deletePurchase(purchase.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = purchase.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -153,5 +156,8 @@ const deletePurchase = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deletePurchase"
+            title="Hapus Transaksi Pembelian" subtitle="Apakah anda yakin ingin menghapus transaksi pembelian ini?" />
     </AuthenticatedLayout>
 </template>

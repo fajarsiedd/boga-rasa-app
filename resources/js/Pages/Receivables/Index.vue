@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     receivables: Array,
@@ -13,12 +14,13 @@ const canView = computed(() => usePage().props.auth.user.can['view-receivables']
 const canEdit = computed(() => usePage().props.auth.user.can['edit-receivable']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-receivable']);
 
-const deleteReceivable = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus piutang ini? Semua detail terkait juga akan dihapus.')) {
-        router.delete(route('piutang.destroy', id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteReceivable = () => {
+    router.delete(route('piutang.destroy', selectedId.value), {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -153,7 +155,8 @@ const deleteReceivable = (id) => {
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
                                             <Link v-if="canEdit" :href="route('piutang.edit', receivable.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteReceivable(receivable.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = receivable.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -164,5 +167,8 @@ const deleteReceivable = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteReceivable"
+            title="Hapus Data Piutang" subtitle="Apakah anda yakin ingin menghapus data piutang ini?" />
     </AuthenticatedLayout>
 </template>

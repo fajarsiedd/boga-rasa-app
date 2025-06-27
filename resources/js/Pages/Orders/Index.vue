@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconCircleCheck } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     orders: Array,
@@ -14,12 +15,13 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-order']);
 const canEdit = computed(() => usePage().props.auth.user.can['edit-order']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-order']);
 
-const deleteOrder = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus pesanan ini? Semua detail terkait juga akan dihapus.')) {
-        router.delete(route('pesanan.destroy', id), {
-            preserveScroll: true,
-        });
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteOrder = () => {
+    router.delete(route('pesanan.destroy', selectedId.value), {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -123,10 +125,10 @@ const deleteOrder = (id) => {
                                     <tr v-for="order in orders" :key="order.id">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                             order.code
-                                        }}</td>
+                                            }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                             order.customer.name
-                                        }}
+                                            }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {{ new Date(order.date).toLocaleDateString('id-ID') }}
@@ -149,7 +151,8 @@ const deleteOrder = (id) => {
                                             <Link v-if="canEdit && !order.picked_at"
                                                 :href="route('pesanan.edit', order.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteOrder(order.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = order.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -160,5 +163,8 @@ const deleteOrder = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteOrder"
+            title="Hapus Data Pesanan" subtitle="Apakah anda yakin ingin menghapus data pesanan ini?" />
     </AuthenticatedLayout>
 </template>

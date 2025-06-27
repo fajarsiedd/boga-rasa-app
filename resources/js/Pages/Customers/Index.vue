@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     customers: Array,
@@ -13,10 +14,11 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-customer'
 const canEdit = computed(() => usePage().props.auth.user.can['edit-customer']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-customer']);
 
-const deleteCustomer = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus konsumen ini?')) {
-        router.delete(route('konsumen.destroy', id));
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteCustomer = () => {
+    router.delete(route('konsumen.destroy', selectedId.value));
 };
 </script>
 
@@ -126,7 +128,8 @@ const deleteCustomer = (id) => {
                                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canEdit" :href="route('konsumen.edit', customer.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteCustomer(customer.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = customer.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -137,5 +140,8 @@ const deleteCustomer = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteCustomer"
+            title="Hapus Data Konsumen" subtitle="Apakah anda yakin ingin menghapus data konsumen ini?" />
     </AuthenticatedLayout>
 </template>

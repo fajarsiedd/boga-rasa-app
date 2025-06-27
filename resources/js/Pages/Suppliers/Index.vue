@@ -1,7 +1,8 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     suppliers: Array,
@@ -13,10 +14,11 @@ const canCreate = computed(() => usePage().props.auth.user.can['create-supplier'
 const canEdit = computed(() => usePage().props.auth.user.can['edit-supplier']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-supplier']);
 
-const deleteSupplier = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus pemasok ini?')) {
-        router.delete(route('pemasok.destroy', id));
-    }
+const showDeleteDialog = ref(false);
+const selectedId = ref(null);
+
+const deleteSupplier = () => {
+    router.delete(route('pemasok.destroy', selectedId.value));
 };
 </script>
 
@@ -119,7 +121,8 @@ const deleteSupplier = (id) => {
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link v-if="canEdit" :href="route('pemasok.edit', supplier.id)"
                                                 class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
-                                            <button v-if="canDelete" @click="deleteSupplier(supplier.id)"
+                                            <button v-if="canDelete"
+                                                @click="() => { showDeleteDialog = true; selectedId = supplier.id }"
                                                 class="text-red-600 hover:text-red-900 focus:outline-none hover:cursor-pointer">Hapus</button>
                                         </td>
                                     </tr>
@@ -130,5 +133,8 @@ const deleteSupplier = (id) => {
                 </div>
             </div>
         </div>
+
+        <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteSupplier"
+            title="Hapus Data Pemasok" subtitle="Apakah anda yakin ingin menghapus data pemasok ini?" />
     </AuthenticatedLayout>
 </template>
