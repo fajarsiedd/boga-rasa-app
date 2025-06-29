@@ -12,11 +12,22 @@ class SupplierController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-suppliers');
 
-        $suppliers = Supplier::all();
+        $suppliersQuery = Supplier::orderBy('name');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $suppliersQuery->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm)
+                    ->orWhere('phone', 'like', $searchTerm);
+            });
+        }
+
+        $suppliers = $suppliersQuery->get();
 
         return Inertia::render('Suppliers/Index', [
             'title' => 'Daftar Pemasok',
@@ -121,7 +132,7 @@ class SupplierController extends Controller
         $supplier = Supplier::find($id);
 
         return Inertia::render('Suppliers/Edit', [
-            'title' => 'Edit Pemasok - ' + $supplier->name,
+            'title' => 'Edit Pemasok - ' . $supplier->name,
             'supplier' => $supplier
         ]);
     }

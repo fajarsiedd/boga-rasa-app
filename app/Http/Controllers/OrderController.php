@@ -16,11 +16,36 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-orders');
 
-        $orders = Order::with('customer')->orderBy('created_at', 'desc')->get();
+        $ordersQuery = Order::with('customer')->orderBy('created_at', 'desc');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $ordersQuery->where(function ($query) use ($searchTerm) {
+                $query->where('code', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($query) use ($searchTerm) {
+                        $query->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        if ($request->has('date') && $request->date != null) {
+            $ordersQuery->whereDate('created_at', $request->date);
+        }
+
+        if ($request->has('status') && $request->status != null) {
+            if ($request->status == 'selesai') {
+                $ordersQuery->whereNotNull('picked_at');
+            } else if ($request->status == 'belum') {
+                $ordersQuery->whereNull('picked_at');
+            }
+        }
+
+        $orders = $ordersQuery->get();
 
         return Inertia::render('Orders/Index', [
             'title' => 'Daftar Pesanan',
@@ -120,7 +145,7 @@ class OrderController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('Orders/Edit', [
-            'title' => 'Edit Pesanan - ' + $order->code,
+            'title' => 'Edit Pesanan - ' . $order->code,
             'order' => $order,
             'customers' => $customers,
             'products' => $products,

@@ -13,11 +13,25 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-customers');
 
-        $customers = Customer::with('customerType')->orderBy('name')->get();
+        $customersQuery = Customer::with('customerType')->orderBy('name');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $customersQuery->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm)
+                    ->orWhere('phone', 'like', $searchTerm)
+                    ->orWhereHas('customerType', function ($query) use ($searchTerm) {
+                        $query->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        $customers = $customersQuery->get();
 
         return Inertia::render('Customers/Index', [
             'title' => 'Daftar Konsumen',
@@ -104,7 +118,7 @@ class CustomerController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambah konsumen',
@@ -132,7 +146,7 @@ class CustomerController extends Controller
         $customerTypes = CustomerType::all();
 
         return Inertia::render('Customers/Edit', [
-            'title' => 'Edit Konsumen - ' + $customer->name,
+            'title' => 'Edit Konsumen - ' . $customer->name,
             'customer' => $customer,
             'customerTypes' => $customerTypes
         ]);

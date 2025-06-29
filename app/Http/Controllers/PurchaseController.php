@@ -15,11 +15,28 @@ class PurchaseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-purchases');
 
-        $purchases = Purchase::with('details.material', 'supplier')->orderBy('created_at', 'desc')->get();
+        $purchasesQuery = Purchase::with('details.material', 'supplier')->orderBy('created_at', 'desc');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $purchasesQuery->where(function ($query) use ($searchTerm) {
+                $query->where('code', 'like', $searchTerm)
+                    ->orWhereHas('supplier', function ($query) use ($searchTerm) {
+                        $query->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        if ($request->has('date') && $request->date != null) {
+            $purchasesQuery->whereDate('created_at', $request->date);
+        }
+
+        $purchases = $purchasesQuery->get();
 
         return Inertia::render('Purchases/Index', [
             'title' => 'Daftar Transaksi Pembelian',
@@ -144,7 +161,7 @@ class PurchaseController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
 
         return Inertia::render('Purchases/Edit', [
-            'title' => 'Edit Transaksi Pembelian - ' + $purchase->code,
+            'title' => 'Edit Transaksi Pembelian - ' . $purchase->code,
             'purchase' => $purchase,
             'materials' => $materials,
             'suppliers' => $suppliers

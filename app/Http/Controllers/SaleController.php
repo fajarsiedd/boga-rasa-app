@@ -18,15 +18,40 @@ class SaleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-sales');
 
-        $sales = Sale::with('details.product', 'customer')->orderBy('created_at', 'desc')->get();
+        $salesQuery = Sale::with('details.product', 'customer')->orderBy('created_at', 'desc');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $salesQuery->where(function ($query) use ($searchTerm) {
+                $query->where('code', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($query) use ($searchTerm) {
+                        $query->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        if ($request->has('date') && $request->date != null) {
+            $salesQuery->whereDate('created_at', $request->date);
+        }
+
+        if ($request->has('status') && $request->status != null) {
+            if ($request->status == 'lunas') {
+                $salesQuery->whereNotNull('paid_at');
+            } else if ($request->status == 'ditunda') {
+                $salesQuery->whereNull('paid_at');
+            }
+        }
+
+        $sales = $salesQuery->get();
 
         return Inertia::render('Sales/Index', [
             'title' => 'Daftar Transaksi Penjualan',
-            'sales' => $sales
+            'sales' => $sales            
         ]);
     }
 
@@ -183,7 +208,7 @@ class SaleController extends Controller
         }
 
         return Inertia::render('Sales/Edit', [
-            'title' => 'Edit Transaksi Penjualan - ' + $sale->code,
+            'title' => 'Edit Transaksi Penjualan - ' . $sale->code,
             'sale' => $sale,
             'receivable' => $receivable,
             'customers' => $customers,
@@ -281,6 +306,7 @@ class SaleController extends Controller
         try {
             $sale = Sale::find($id);
             $sale->details()->delete();
+            $sale->receivable()->delete();
             $sale->delete();
 
             DB::commit();

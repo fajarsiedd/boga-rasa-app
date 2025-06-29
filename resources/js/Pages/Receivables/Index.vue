@@ -1,11 +1,18 @@
 <script setup>
-import { router, usePage } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled } from '@tabler/icons-vue';
+import { IconSearch, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconChevronDown, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
     receivables: Array,
+});
+
+const form = useForm({
+    search: null,
+    due_date: null,
+    paid_at: null,
+    status: 'semua'
 });
 
 const flash = computed(() => usePage().props.flash);
@@ -16,12 +23,62 @@ const canDelete = computed(() => usePage().props.auth.user.can['delete-receivabl
 
 const showDeleteDialog = ref(false);
 const selectedId = ref(null);
+const showFilters = ref(false);
+const isFiltered = ref(false);
 
 const deleteReceivable = () => {
     router.delete(route('piutang.destroy', selectedId.value), {
         preserveScroll: true,
     });
 };
+
+const onPaidAtChanged = () => {
+    if (form.paid_at) {
+        form.status = 'lunas';
+    }
+
+    fetchData();
+}
+
+const onStatusChanged = () => {
+    if (form.status === 'ditunda') {
+        form.paid_at = null;
+    }
+
+    fetchData();
+}
+
+const fetchData = () => {
+    const params = {};
+
+    if (form.search) {
+        params.search = form.search;
+        isFiltered.value = true;
+    }
+    if (form.due_date) {
+        params.due_date = form.due_date;
+        isFiltered.value = true;
+    }
+    if (form.paid_at) {
+        params.paid_at = form.paid_at;
+        isFiltered.value = true;
+    }
+    if (form.status) {
+        params.status = form.status;
+        isFiltered.value = true;
+    }
+
+    router.get(route('piutang.index'), params, {
+        preserveScroll: true,
+        preserveState: true
+    });
+}
+
+const resetFilters = () => {
+    form.reset();
+
+    router.get(route('piutang.index'), {});
+}
 </script>
 
 <template>
@@ -58,15 +115,89 @@ const deleteReceivable = () => {
                         </button>
                     </div>
 
+                    <div v-if="receivables.length > 0 || isFiltered" class="flex flex-col mb-4">
+                        <div class="flex flex-row items-center justify-between mb-2">
+                            <div class="flex flex-row gap-2">
+                                <form @submit.prevent="fetchData">
+                                    <div
+                                        class="group flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-400 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-green-700">
+                                        <input type="text" name="search" id="search" v-model="form.search"
+                                            class="block min-w-0 w-50 grow py-1.5 pr-2 pl-1 text-base text-gray-700 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                                            placeholder="Cari piutang" />
+                                        <button type="submit">
+                                            <IconSearch
+                                                class="mr-2 text-gray-400 group-focus-within:text-green-700 group-hover:text-green-700 transition-colors duration-200"
+                                                stroke="1.5" />
+                                        </button>
+                                    </div>
+                                </form>
+                                <button @click="() => showFilters = !showFilters" type="button"
+                                    class="inline-flex items-center justify-center px-2 bg-gray-100 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                    <IconAdjustmentsHorizontal class="text-green-700" size="20" stroke="1.5" />
+                                </button>
+                                <button v-if="isFiltered" @click="resetFilters" type="button"
+                                    class="inline-flex items-center justify-center px-2 bg-gray-100 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                    <IconReload class="text-green-700" size="20" />
+                                </button>
+                            </div>
+                            <div />
+                        </div>
+
+                        <div v-if="showFilters"
+                            class="flex flex-row items-center w-full text-gray-700 rounded-md py-2 gap-4">
+                            <div class="w-full">
+                                <label for="status" class="block text-sm font-medium text-gray-700">Status
+                                    Pembayaran</label>
+                                <div class="relative w-full h-10 mt-1">
+                                    <select id="status" @change="onStatusChanged"
+                                        class="block w-full h-full text-sm appearance-none rounded-md border border-gray-300 px-2 pr-4 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none text-gray-700 transition-all duration-200 ease-in-out"
+                                        v-model="form.status" required>
+                                        <option value="semua" class="py-2 px-3 text-gray-700">
+                                            Semua
+                                        </option>
+                                        <option value="lunas" class="py-2 px-3 text-gray-700">
+                                            Lunas
+                                        </option>
+                                        <option value="ditunda" class="py-2 px-3 text-gray-700">
+                                            Ditunda
+                                        </option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute flex items-center inset-y-0 right-2 text-gray-700">
+                                        <IconChevronDown size="16" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <label for="due_date" class="block text-sm font-medium text-gray-700">Tgl. Jatuh
+                                    Tempo</label>
+                                <input type="date" v-model="form.due_date" @change="fetchData"
+                                    class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
+                            </div>
+
+                            <div class="w-full">
+                                <label for="paid_at" class="block text-sm font-medium text-gray-700">Tgl.
+                                    Pembayaran</label>
+                                <input type="date" v-model="form.paid_at" @change="onPaidAtChanged"
+                                    class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
+                            </div>
+                        </div>
+                    </div>
+
                     <div v-if="receivables.length === 0"
                         class="w-full p-10 flex flex-col items-center justify-center text-gray-700">
                         <div class="w-32 h-32 rounded-full bg-green-50 mb-2">
                             <img src="/public/assets/empty-state.png" alt="" srcset="">
                         </div>
-                        <p class="font-semibold mb-2">Belum ada data piutang</p>
-                        <p class="text-sm text-center text-gray-500 mb-4">Penjualan dengan pembayaran ditunda
-                            akan
-                            ditampilkan disini.</p>
+                        <p class="font-semibold mb-2">{{
+                            isFiltered ? 'Data tidak ditemukan' : 'Belum ada data piutang'
+                        }}
+                        </p>
+                        <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Transaksi penjualan yang
+                            tercatata sebagai piutang akan ditampilkan disini.</p>
+                        <p v-else="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Silakan gunakan kata
+                            kunci atau filter lain.</p>
                     </div>
 
                     <div v-else class="overflow-x-auto border border-gray-200 rounded-lg">

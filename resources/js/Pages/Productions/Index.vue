@@ -126,7 +126,7 @@ onUnmounted(() => {
                     <p class="font-semibold text-lg text-gray-700 leading-tight">Estimasi Produksi Hari {{
                         formattedProductionDate }}</p>
                     <button @click="toggleFullscreen" type="button"
-                        class="bg-gray-100 text-green-700 p-2 rounded-md hover:cursor-pointer hover:bg-gray-200">
+                        class="bg-gray-100 text-green-700 p-2 rounded-md border border-transparent hover:cursor-pointer hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                         <IconArrowsMaximize v-if="!isFullscreen" size="18" />
                         <IconArrowsMinimize v-if="isFullscreen" size="18" />
                     </button>

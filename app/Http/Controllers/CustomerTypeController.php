@@ -12,11 +12,21 @@ class CustomerTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-customer-types');
 
-        $customerTypes = CustomerType::all();
+        $customerTypesQuery = CustomerType::orderBy('name');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $customerTypesQuery->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm);
+            });
+        }
+
+        $customerTypes = $customerTypesQuery->get();
 
         return Inertia::render('CustomerTypes/Index', [
             'title' => 'Daftar Tipe Konsumen',
@@ -86,7 +96,7 @@ class CustomerTypeController extends Controller
         $customerType = CustomerType::find($id);
 
         return Inertia::render('CustomerTypes/Edit', [
-            'title' => 'Edit Tipe Konsumen - ' + $customerType->name, 
+            'title' => 'Edit Tipe Konsumen - ' . $customerType->name,
             'customerType' => $customerType
         ]);
     }

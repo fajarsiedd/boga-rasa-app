@@ -12,11 +12,21 @@ class MaterialController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-materials');
 
-        $materials = Material::all();
+        $materialsQuery = Material::orderBy('name');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $materialsQuery->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm);
+            });
+        }
+
+        $materials = $materialsQuery->get();
 
         return Inertia::render('Materials/Index', [
             'title' => 'Daftar Bahan Baku',
@@ -85,10 +95,10 @@ class MaterialController extends Controller
     {
         $this->authorize('edit-material');
 
-        $material = Material::find($id);        
+        $material = Material::find($id);
 
         return Inertia::render('Materials/Edit', [
-            'title' => 'Edit Bahan Baku - ' + $material->name,
+            'title' => 'Edit Bahan Baku - ' . $material->name,
             'material' => $material
         ]);
     }

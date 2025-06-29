@@ -13,11 +13,48 @@ class ReceivableController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-receivables');
 
-        $receivables = Receivable::with('sale.customer')->orderBy('due_date', 'asc')->get();
+        $receivablesQuery = Receivable::with('sale.customer')->orderBy('due_date', 'asc');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $receivablesQuery->whereHas('sale', function ($query) use ($searchTerm) {
+                $query->where('code', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($query) use ($searchTerm) {
+                        $query->where('name', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        if ($request->has('due_date') && $request->due_date != null) {
+            $receivablesQuery->whereDate('due_date', $request->due_date);
+        }
+
+        if ($request->has('status') && $request->status != null) {
+            if ($request->status == 'lunas') {
+                $receivablesQuery->whereHas('sale', function ($query) {
+                    $query->whereNotNull('paid_at');
+                });
+            } else if ($request->status == 'ditunda') {
+                $receivablesQuery->whereHas('sale', function ($query) {
+                    $query->whereNull('paid_at');
+                });
+            }
+        }
+
+        if ($request->has('paid_at') && $request->paid_at != null) {
+            $paid_at = $request->paid_at;
+
+            $receivablesQuery->whereHas('sale', function ($query) use ($paid_at) {
+                $query->whereDate('paid_at', $paid_at);
+            });
+        }
+
+        $receivables = $receivablesQuery->get();
 
         return Inertia::render('Receivables/Index', [
             'title' => 'Daftar Piutang',
@@ -60,7 +97,7 @@ class ReceivableController extends Controller
         $receivable->due_date = Carbon::parse($receivable->due_date)->setTimezone(config('app.timezone'))->format('Y-m-d');
 
         return Inertia::render('Receivables/Edit', [
-            'title' => 'Edit Piutang - ' + $receivable->sale->code,
+            'title' => 'Edit Piutang - ' . $receivable->sale->code,
             'receivable' => $receivable
         ]);
     }

@@ -7,16 +7,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view-products');
 
-        $products = Product::all();
+        $productsQuery = Product::orderBy('code');
+
+        if ($request->has('search') && $request->search != null) {
+            $searchTerm = '%' . $request->search . '%';
+
+            $productsQuery->where(function ($query) use ($searchTerm) {
+                $query->where('code', 'like', $searchTerm)
+                    ->orWhere('name', 'like', $searchTerm);
+            });
+        }
+
+        $products = $productsQuery->get();
 
         return Inertia::render('Products/Index', [
             'title' => 'Daftar Produk',
@@ -88,7 +101,7 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         return Inertia::render('Products/Edit', [
-            'title' => 'Edit Produk - ' + $product->name,
+            'title' => 'Edit Produk - ' . $product->name,
             'product' => $product
         ]);
     }
