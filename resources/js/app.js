@@ -3,6 +3,7 @@ import { createApp, h } from 'vue'
 import { createInertiaApp, Head, Link } from '@inertiajs/vue3'
 import { ZiggyVue } from '../../vendor/tightenco/ziggy'
 import AuthenticatedLayout from '../../resources/js/Layouts/AuthenticatedLayout.vue';
+import VueApexCharts from "vue3-apexcharts";
 
 createInertiaApp({
   resolve: name => {
@@ -15,6 +16,7 @@ createInertiaApp({
     createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(ZiggyVue)
+      .use(VueApexCharts)
       
       .component('Head', Head)
       .component('Link', Link)      

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerTypeController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -16,11 +17,7 @@ use Inertia\Inertia;
 Route::get('/')->middleware('redirect.auth.guest');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard', [
-            'title' => 'Dashboard'
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Resources
     Route::resource('tipe-konsumen', CustomerTypeController::class);
