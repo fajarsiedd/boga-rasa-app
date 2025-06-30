@@ -219,7 +219,7 @@ const resetFilters = () => {
                                     </td>
                                     <td class="text-left px-6 whitespace-nowrap text-sm text-gray-700">
                                         <Link v-if="!order.picked_at"
-                                            :href="route('pesanan.create', { order_id: order.id })"
+                                            :href="route('penjualan.create', { order_id: order.id })"
                                             class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-xs text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                                         <span>Selesaikan Pesanan</span>
                                         </Link>
