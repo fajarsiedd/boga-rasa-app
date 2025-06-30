@@ -1,5 +1,5 @@
 <script setup>
-import { usePage, useForm } from '@inertiajs/vue3';
+import { usePage, useForm, router } from '@inertiajs/vue3';
 import { IconArrowsMaximize, IconArrowsMinimize, IconUser, IconCircleCheckFilled, IconX, IconXboxXFilled, IconReload } from '@tabler/icons-vue';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { format } from 'date-fns';
@@ -9,10 +9,12 @@ import { IconPlus } from '@tabler/icons-vue';
 const props = defineProps({
     production: Object,
     orders: Array,
+    filter: Object
 });
 
 const form = useForm({
     total: props.production.total,
+    date: props.filter.date,
     refresh: false
 });
 
@@ -88,6 +90,19 @@ onUnmounted(() => {
         isFullscreen.value = !!document.fullscreenElement;
     });
 });
+
+const fetchData = () => {
+    const params = {};
+
+    if (form.date) {
+        params.date = form.date;
+    }
+
+    router.get(route('produksi.index'), params, {
+        preserveScroll: true,
+        preserveState: true
+    });
+}
 </script>
 
 <template>
@@ -122,14 +137,22 @@ onUnmounted(() => {
                         <IconX class="text-gray-700" />
                     </button>
                 </div>
-                <div class="inline-flex justify-between mb-2 w-full">
-                    <p class="font-semibold text-lg text-gray-700 leading-tight">Estimasi Produksi Hari {{
-                        formattedProductionDate }}</p>
-                    <button @click="toggleFullscreen" type="button"
-                        class="bg-gray-100 text-green-700 p-2 rounded-md border border-transparent hover:cursor-pointer hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
-                        <IconArrowsMaximize v-if="!isFullscreen" size="18" />
-                        <IconArrowsMinimize v-if="isFullscreen" size="18" />
-                    </button>
+                <div class="inline-flex justify-between mb-4 items-start w-full">
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-md text-gray-700 leading-tight">Estimasi Produksi</span>
+                        <span class="text-sm text-gray-500">Hari {{ formattedProductionDate }}</span>
+                    </div>
+                    <div class="flex flex-row gap-2 items-center justify-center">
+                        <div class="w-48">
+                            <input type="date" id="date" v-model="form.date" @change="fetchData"
+                                class="block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
+                        </div>
+                        <button @click="toggleFullscreen" type="button"
+                            class="bg-gray-100 text-green-700 p-2 h-10 w-10 inline-flex items-center justify-center rounded-md border border-transparent hover:cursor-pointer hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <IconArrowsMaximize v-if="!isFullscreen" size="18" />
+                            <IconArrowsMinimize v-if="isFullscreen" size="18" />
+                        </button>
+                    </div>
                 </div>
                 <div class="flex flex-row text-gray-700">
                     <div class="w-full mr-4">
@@ -162,7 +185,7 @@ onUnmounted(() => {
                             <p class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk
                                 menambahkan
                                 data
-                                baru.</p>
+                                pesanan.</p>
                             <Link v-if="canCreate" :href="route('pesanan.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />

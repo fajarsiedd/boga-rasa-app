@@ -10,12 +10,18 @@ use Inertia\Inertia;
 
 class ProductionController extends Controller
 {
-    public function index()
-    {
+    public function index(Request $request)
+    {        
+        if ($request->input('date')) {
+            $date = Carbon::parse($request->date);
+        } else {
+            $date = Carbon::tomorrow();
+        }
+
         $jiranganFromOrders = 0;
         // $jiranganFromDirectSales = 0;
 
-        $orders = Order::with('details.product', 'customer')->whereDate('date', Carbon::tomorrow())->get();
+        $orders = Order::with('details.product', 'customer')->whereDate('date', $date)->get();
         if ($orders->isNotEmpty()) {
             foreach ($orders as $order) {
                 foreach ($order->details as $detail) {
@@ -24,7 +30,7 @@ class ProductionController extends Controller
             }
         }
 
-        $production = Production::whereDate('date', Carbon::tomorrow())->first();
+        $production = Production::whereDate('date', $date)->first();
         if ($production) {
             $production->orders = $jiranganFromOrders;
             $production->direct_sales = 0;
@@ -47,7 +53,10 @@ class ProductionController extends Controller
         return Inertia::render('Productions/Index', [
             'title' => 'Produksi',
             'production' => $production,
-            'orders' => $orders
+            'orders' => $orders,
+            'filter' => [
+                'date' => $date->toDateString()
+            ]
         ]);
     }
 
