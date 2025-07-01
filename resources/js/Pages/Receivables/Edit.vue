@@ -57,7 +57,7 @@ const submitForm = () => {
 
                                     <label for="customer_id"
                                         class="block text-sm font-medium text-gray-700">Konsumen</label>
-                                    <div class="flex items-center mt-1">
+                                    <div class="flex items-center mt-1 text-gray-700 text-sm">
                                         {{ receivable.sale.customer.name }} ({{
                                             receivable.sale.customer.customer_type.name }})
                                     </div>

@@ -20,7 +20,7 @@ class OrderController extends Controller
     {
         $this->authorize('view-orders');
 
-        $ordersQuery = Order::with('customer')->orderBy('created_at', 'desc');
+        $ordersQuery = Order::with('customer.customerType', 'details.product')->orderBy('created_at', 'desc');
 
         if ($request->has('search') && $request->search != null) {
             $searchTerm = '%' . $request->search . '%';

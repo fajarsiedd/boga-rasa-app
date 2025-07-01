@@ -3,6 +3,7 @@ import { router, usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
+import DetailModal from '../../Components/DetailModal.vue';
 
 const props = defineProps({
     purchases: Array
@@ -24,6 +25,8 @@ const showDeleteDialog = ref(false);
 const selectedId = ref(null);
 const showFilters = ref(false);
 const isFiltered = ref(false);
+const showDetailDialog = ref(false);
+const selectedPurchase = ref(null);
 
 const deletePurchase = () => {
     router.delete(route('pembelian.destroy', selectedId.value), {
@@ -195,8 +198,9 @@ const resetFilters = () => {
                                     </td>
                                     <td v-if="canEdit || canDelete || canView"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link v-if="canView" :href="route('pembelian.edit', purchase.id)"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                        <button v-if="canView"
+                                            @click="() => { showDetailDialog = true; selectedPurchase = purchase }"
+                                            class="text-blue-600 hover:text-blue-900 mr-4 focus:outline-none hover:cursor-pointer">Detail</button>
                                         <Link v-if="canEdit" :href="route('pembelian.edit', purchase.id)"
                                             class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                         <button v-if="canDelete"
@@ -214,4 +218,91 @@ const resetFilters = () => {
 
     <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deletePurchase"
         title="Hapus Transaksi Pembelian" subtitle="Apakah anda yakin ingin menghapus transaksi pembelian ini?" />
+
+    <DetailModal :show="showDetailDialog" @close="showDetailDialog = false"
+        :title="selectedPurchase ? 'Pembelian ' + selectedPurchase.code : '-'">
+        <div class="w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                        Transaksi</label>
+                    <span class="text-gray-700 text-sm">{{ new
+                        Date(selectedPurchase.created_at).toLocaleDateString('id-ID')
+                    }}</span>
+                </div>
+
+                <div>
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700">Pemasok</label>
+                    <div class="flex items-center mt-1 text-gray-700 text-sm">
+                        {{ selectedPurchase.supplier.name }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nota Pembelian</label>
+                    <span v-if="!selectedPurchase.receipt_image" class="text-gray-700 text-sm">
+                        Tidak ada
+                    </span>
+                    <a v-else :href="'/storage/' + selectedPurchase.receipt_image" target="_blank"
+                        class="py-1 px-4 rounded-md text-white bg-green-700 inline-flex justify-center items-center hover:bg-green-900 hover:cursor-pointer text-sm">
+                        Lihat Nota
+                    </a>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <h3 class="text-md font-medium text-gray-700 mb-2">Detail Pembelian</h3>
+            <div class="space-y-4">
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="w-full">
+                        <thead class="bg-green-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Bahan Baku</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Jumlah</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="detail in selectedPurchase.details" :key="detail.id">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                    {{
+                                        detail.material.name
+                                    }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.qty
+                                }} gr
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.subtotal.toLocaleString('id-ID', {
+                                        style: 'currency', currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    })
+                                }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-right mt-8">
+                <h4 class="text-2xl font-bold text-gray-800">Total:
+                    <span class="text-green-700">
+                        {{
+                            selectedPurchase.total.toLocaleString('id-ID', {
+                                style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }) }}
+                    </span>
+                </h4>
+            </div>
+        </div>
+    </DetailModal>
 </template>

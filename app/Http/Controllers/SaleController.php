@@ -22,7 +22,7 @@ class SaleController extends Controller
     {
         $this->authorize('view-sales');
 
-        $salesQuery = Sale::with('details.product', 'customer')->orderBy('created_at', 'desc');
+        $salesQuery = Sale::with('details.product', 'customer.customerType', 'receivable')->orderBy('created_at', 'desc');
 
         if ($request->has('search') && $request->search != null) {
             $searchTerm = '%' . $request->search . '%';

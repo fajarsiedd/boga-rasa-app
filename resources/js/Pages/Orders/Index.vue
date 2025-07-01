@@ -3,6 +3,7 @@ import { router, usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { IconSearch, IconCircleCheck, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconChevronDown, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
+import DetailModal from '../../Components/DetailModal.vue';
 
 const props = defineProps({
     orders: Array,
@@ -25,6 +26,8 @@ const showDeleteDialog = ref(false);
 const selectedId = ref(null);
 const showFilters = ref(false);
 const isFiltered = ref(false);
+const selectedOrder = ref(null);
+const showDetailDialog = ref(false);
 
 const deleteOrder = () => {
     router.delete(route('pesanan.destroy', selectedId.value), {
@@ -170,7 +173,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data pesanan'
-                            }}
+                        }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol buat transaksi
                             untuk
@@ -209,10 +212,10 @@ const resetFilters = () => {
                                 <tr v-for="order in orders" :key="order.id">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         order.code
-                                        }}</td>
+                                    }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         order.customer.name
-                                        }}
+                                    }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ new Date(order.date).toLocaleDateString('id-ID') }}
@@ -230,8 +233,9 @@ const resetFilters = () => {
                                     </td>
                                     <td v-if="canEdit || canDelete || canView"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link v-if="canView" :href="route('pesanan.edit', order.id)"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                        <button v-if="canView"
+                                            @click="() => { showDetailDialog = true; selectedOrder = order }"
+                                            class="text-blue-600 hover:text-blue-900 mr-4 focus:outline-none hover:cursor-pointer">Detail</button>
                                         <Link v-if="canEdit && !order.picked_at" :href="route('pesanan.edit', order.id)"
                                             class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                         <button v-if="canDelete"
@@ -249,4 +253,66 @@ const resetFilters = () => {
 
     <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteOrder"
         title="Hapus Data Pesanan" subtitle="Apakah anda yakin ingin menghapus data pesanan ini?" />
+
+    <DetailModal :show="showDetailDialog" @close="showDetailDialog = false"
+        :title="selectedOrder ? 'Pesanan ' + selectedOrder.code : '-'">
+        <div class="w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                        Pengambilan</label>
+                    <span class="text-gray-700 text-sm">{{ new
+                        Date(selectedOrder.date).toLocaleDateString('id-ID')
+                    }}</span>
+                </div>       
+                
+                <div>
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700">Konsumen</label>
+                    <div class="flex items-center mt-1 text-gray-700 text-sm">
+                        {{ selectedOrder.customer.name }} ({{
+                            selectedOrder.customer.customer_type.name }})
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status
+                        Pesanan</label>
+                    <span class="text-gray-700 text-sm">
+                        {{ selectedOrder.picked_at ? 'Selesai' : 'Belum Diambil' }}
+                    </span>
+                </div>                
+            </div>
+
+            <!-- Details -->
+            <h3 class="text-md font-medium text-gray-700 mb-2">Detail Pesanan</h3>
+            <div class="space-y-4">
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="w-full">
+                        <thead class="bg-green-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Nama Produk</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="detail in selectedOrder.details" :key="detail.id">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                    {{
+                                        detail.product.name
+                                    }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.qty
+                                }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </DetailModal>
 </template>

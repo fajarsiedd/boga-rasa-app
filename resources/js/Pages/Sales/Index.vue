@@ -3,6 +3,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconChevronDown, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
+import DetailModal from '../../Components/DetailModal.vue';
 
 const props = defineProps({
     sales: Array,
@@ -22,7 +23,9 @@ const canEdit = computed(() => usePage().props.auth.user.can['edit-sale']);
 const canDelete = computed(() => usePage().props.auth.user.can['delete-sale']);
 
 const showDeleteDialog = ref(false);
+const showDetailDialog = ref(false);
 const selectedId = ref(null);
+const selectedSale = ref(null);
 const showFilters = ref(false);
 const isFiltered = ref(false);
 
@@ -90,8 +93,7 @@ const resetFilters = () => {
                             <span class="font-semibold">Error! </span>
                             <span class="block sm:inline">{{ flash.error }}</span>
                         </div>
-                        <button type="button" @click="() => flash.error = null"
-                            class="hover:cursor-pointer">
+                        <button type="button" @click="() => flash.error = null" class="hover:cursor-pointer">
                             <IconX class="text-gray-700" />
                         </button>
                     </div>
@@ -241,8 +243,9 @@ const resetFilters = () => {
                                     </td>
                                     <td v-if="canEdit || canDelete || canView"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link v-if="canView" :href="route('penjualan.edit', sale.id)"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Detail</Link>
+                                        <button v-if="canView"
+                                            @click="() => { showDetailDialog = true; selectedSale = sale }"
+                                            class="text-blue-600 hover:text-blue-900 mr-4 focus:outline-none hover:cursor-pointer">Detail</button>
                                         <Link v-if="canEdit" :href="route('penjualan.edit', sale.id)"
                                             class="text-blue-600 hover:text-blue-900 mr-4">Edit</Link>
                                         <button v-if="canDelete"
@@ -260,4 +263,103 @@ const resetFilters = () => {
 
     <ConfirmationModal :show="showDeleteDialog" @close="showDeleteDialog = false" @onRightClick="deleteSale"
         title="Hapus Transaksi Penjualan" subtitle="Apakah anda yakin ingin menghapus transaksi penjualan ini?" />
+
+    <DetailModal :show="showDetailDialog" @close="showDetailDialog = false"
+        :title="selectedSale ? 'Penjualan ' + selectedSale.code : '-'">
+        <div class="w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                        Transaksi</label>
+                    <span class="text-gray-700 text-sm">{{ new
+                        Date(selectedSale.created_at).toLocaleDateString('id-ID')
+                        }}</span>
+                </div>
+
+                <div>
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700">Konsumen</label>
+                    <div class="flex items-center mt-1 text-gray-700 text-sm">
+                        {{ selectedSale.customer.name }} ({{
+                            selectedSale.customer.customer_type.name }})
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status
+                        Pembayaran</label>
+                    <span class="text-gray-700 text-sm">
+                        {{ selectedSale.paid_at ? 'Lunas' : 'Ditunda' }}
+                    </span>
+                </div>
+
+                <div v-if="!selectedSale.paid_at">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jatuh Tempo</label>
+                    <span class="text-gray-700 text-sm">
+                        {{ new Date(selectedSale.receivable.due_date).toLocaleDateString('id-ID') }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <h3 class="text-md font-medium text-gray-700 mb-2">Detail Penjualan</h3>
+            <div class="space-y-4">
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="w-full">
+                        <thead class="bg-green-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Nama Produk</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Jumlah</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Harga</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                    Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="detail in selectedSale.details" :key="detail.id">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                    {{
+                                        detail.product.name
+                                    }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.qty
+                                    }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.product.price
+                                    }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    detail.subtotal.toLocaleString('id-ID', {
+                                        style: 'currency', currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    })
+                                }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-right mt-8">
+                <h4 class="text-2xl font-bold text-gray-800">Total:
+                    <span class="text-green-700">
+                        {{
+                            selectedSale.total.toLocaleString('id-ID', {
+                                style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }) }}
+                    </span>
+                </h4>
+            </div>
+        </div>
+    </DetailModal>
 </template>

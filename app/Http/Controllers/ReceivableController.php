@@ -17,7 +17,7 @@ class ReceivableController extends Controller
     {
         $this->authorize('view-receivables');
 
-        $receivablesQuery = Receivable::with('sale.customer')->orderBy('due_date', 'asc');
+        $receivablesQuery = Receivable::with('sale.customer.customerType', 'sale.details.product')->orderBy('due_date', 'asc');
 
         if ($request->has('search') && $request->search != null) {
             $searchTerm = '%' . $request->search . '%';
