@@ -185,7 +185,7 @@ const fetchData = () => {
                                 menambahkan
                                 data
                                 pesanan.</p>
-                            <Link v-if="canCreate" :href="route('pesanan.create')"
+                            <Link v-if="canCreate && !isFullscreen" :href="route('pesanan.create')"
                                 class="inline-flex items-center px-4 py-2 bg-green-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconPlus class="mr-2" size="20" />
                             <span>Tambah Pesanan Baru</span>
@@ -208,7 +208,8 @@ const fetchData = () => {
                         </div>
                         <div
                             class="flex flex-col items-center justify-center text-center border border-green-700 rounded-md p-2 mt-2 w-48">
-                            <p class="font-semibold">Rekomendasi Jumlah Produksi</p>
+                            <p class="font-semibold">{{ isFullscreen ? 'Jumlah Produksi' : 'Rekomendasi Jumlah Produksi'
+                                }}</p>
 
                             <form v-if="isEdit" @submit.prevent="submitForm" class="w-full">
                                 <input type="number" v-model="form.total" required autofocus
@@ -224,7 +225,7 @@ const fetchData = () => {
                                 <h3 class="font-bold text-5xl text-green-700">{{ production.total }}
                                 </h3>
                                 <p class="text-sm">(Jirangan)</p>
-                                <div class="flex flex-row gap-2">
+                                <div v-if="!isFullscreen" class="flex flex-row gap-2">
                                     <button @click="toggleEdit" type="button"
                                         class="inline-flex items-center justify-center px-4 py-2 mt-4 w-full bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150"
                                         :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

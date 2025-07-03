@@ -120,7 +120,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data bahan baku'
-                            }}
+                        }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk
                             menambahkan
@@ -158,10 +158,11 @@ const resetFilters = () => {
                                 <tr v-for="material in materials" :key="material.id">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         material.name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                        material.stock ||
-                                        '0'
-                                    }} gr</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                                        :class="{ 'text-red-500': material.stock < 0 }">{{
+                                            material.stock ||
+                                            '0'
+                                        }} gr</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         material.measure_per_jirangan ||
                                         '0'
