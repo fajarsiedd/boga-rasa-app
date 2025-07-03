@@ -16,7 +16,8 @@ import {
     IconChevronDown,
     IconChecklist,
     IconCheese,
-    IconCoins
+    IconCoins,
+    IconReport
 } from '@tabler/icons-vue';
 import SidebarMenuItem from '@/Components/SidebarMenuItem.vue';
 
@@ -119,7 +120,8 @@ const logout = () => {
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('bahan-baku.*')" />
 
                     <!-- Laporan -->
-
+                    <SidebarMenuItem :href="route('laporan.index')" text="Laporan" :icon="IconReport"
+                        :sidebarExpanded="sidebarExpanded" :isActive="route().current('laporan.*')" />
                 </div>
 
                 <!-- Data Master -->
@@ -201,6 +203,8 @@ const logout = () => {
                         text="Stok Bahan Baku" :icon="IconCube" :isActive="route().current('bahan-baku.*')" />
 
                     <!-- Laporan -->
+                    <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('laporan.index')"
+                        text="Laporan" :icon="IconReport" :isActive="route().current('laporan.*')" />
 
                 </div>
 

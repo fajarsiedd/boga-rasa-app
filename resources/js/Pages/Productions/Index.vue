@@ -99,8 +99,7 @@ const fetchData = () => {
     }
 
     router.get(route('produksi.index'), params, {
-        preserveScroll: true,
-        preserveState: true
+        preserveScroll: true
     });
 }
 </script>

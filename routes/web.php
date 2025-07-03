@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReceivableController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pesanan', OrderController::class);
     Route::resource('piutang', ReceivableController::class);
     Route::resource('produksi', ProductionController::class);
+    Route::resource('laporan', ReportController::class);
 
     // API
     Route::prefix('api')->group(function () {

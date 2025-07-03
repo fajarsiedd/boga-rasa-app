@@ -11,7 +11,7 @@ use Inertia\Inertia;
 class ProductionController extends Controller
 {
     public function index(Request $request)
-    {        
+    {
         if ($request->input('date')) {
             $date = Carbon::parse($request->date);
         } else {
@@ -34,7 +34,7 @@ class ProductionController extends Controller
         if ($production) {
             $production->orders = $jiranganFromOrders;
             $production->direct_sales = 0;
-            
+
             if (!$production->is_customized) {
                 $production->total = round($jiranganFromOrders + 0);
             }
@@ -45,7 +45,7 @@ class ProductionController extends Controller
                 'orders' => $jiranganFromOrders,
                 'direct_sales' => 0,
                 'total' => round($jiranganFromOrders + 0),
-                'date' => Carbon::tomorrow(),
+                'date' => $date,
                 'is_customized' => false
             ]);
         }
@@ -65,8 +65,8 @@ class ProductionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try {            
-            $production = Production::find($id);            
+        try {
+            $production = Production::find($id);
 
             if ($request->boolean('refresh')) {
                 $production->is_customized = false;

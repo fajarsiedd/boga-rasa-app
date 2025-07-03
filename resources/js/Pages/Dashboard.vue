@@ -70,11 +70,9 @@ const lineChartOptions = computed(() => ({
         x: {
             format: 'dd MMM yyyy'
         }
-    },
-    // ... opsi lain seperti dataLabels, colors, grid
+    },    
 }));
 
-// Opsi untuk Pie Chart
 const pieChartOptions = computed(() => ({
     chart: {
         type: 'pie',
@@ -90,8 +88,7 @@ const pieChartOptions = computed(() => ({
                 position: 'bottom'
             }
         }
-    }],
-    // ... opsi lain seperti dataLabels, theme
+    }],    
 }));
 </script>
 

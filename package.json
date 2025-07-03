@@ -20,6 +20,8 @@
         "@vitejs/plugin-vue": "^5.2.4",
         "apexcharts": "^4.7.0",
         "date-fns": "^4.1.0",
+        "html2canvas-pro": "^1.5.11",
+        "jspdf": "^3.0.1",
         "vue3-apexcharts": "^1.8.0"
     }
 }
