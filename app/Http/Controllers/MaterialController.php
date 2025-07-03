@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Material;
+use App\Models\Production;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,6 +18,15 @@ class MaterialController extends Controller
     {
         $this->authorize('view-materials');
 
+        $historicalTotalProductionJirangan = $this->getHistoricalTotalProduction(15);        
+
+        $alpha = 0.3; // Konstanta smoothing
+        $predictedJirangan = $this->simpleExponentialSmoothing($historicalTotalProductionJirangan, $alpha);        
+
+        if ($predictedJirangan < 0) {
+            $predictedJirangan = 0;
+        }
+
         $materialsQuery = Material::orderBy('name');
 
         if ($request->has('search') && $request->search != null) {
@@ -27,6 +38,34 @@ class MaterialController extends Controller
         }
 
         $materials = $materialsQuery->get();
+        $today = Carbon::today();
+
+        foreach ($materials as $material) {
+            $currentStock = $material->stock;
+            $usagePerJirangan = $material->measure_per_jirangan;
+
+            $daysUntilDepletion = 0;
+
+            if ($predictedJirangan <= 0 || $usagePerJirangan <= 0) {
+                $material->estimated_depletion_date = 'N/A';
+            } else {
+                $dailyConsumption = $predictedJirangan * $usagePerJirangan;
+
+                while ($currentStock > 0) {
+                    $currentStock -= $dailyConsumption;
+                    $daysUntilDepletion++;
+
+                    if ($daysUntilDepletion > 365 * 5) {
+                        $daysUntilDepletion = 'N/A';
+                        break;
+                    }
+                }
+
+                if ($material->estimated_depletion_date !== 'N/A') {
+                    $material->estimated_depletion_date = Carbon::parse($today->copy()->addDays($daysUntilDepletion))->locale('id')->translatedFormat('d F Y');
+                }
+            }
+        }
 
         return Inertia::render('Materials/Index', [
             'title' => 'Daftar Bahan Baku',
@@ -160,5 +199,51 @@ class MaterialController extends Controller
                 ->with('error', 'Terjadi kesalahan saat menghapus bahan baku: ' . $th->getMessage())
                 ->withInput();
         }
+    }
+
+    private function getHistoricalTotalProduction(int $days): array
+    {
+        $historicalData = [];
+        $endDate = Carbon::yesterday()->endOfDay();
+        $startDate = $endDate->copy()->subDays($days - 1)->startOfDay();
+
+        $dailyProductionMap = Production::select(DB::raw('DATE(date) as production_date'), 'total')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'ASC')
+            ->pluck('total', 'production_date')
+            ->all();            
+
+        $currentDate = $startDate->copy();
+        while ($currentDate->lessThanOrEqualTo(Carbon::yesterday()->startOfDay())) {
+            $dateString = $currentDate->toDateString();
+
+            $totalProduction = $dailyProductionMap[$dateString] ?? 0;
+
+            $historicalData[] = $totalProduction;
+            $currentDate->addDay();
+        }
+
+        return $historicalData;
+    }
+
+    private function simpleExponentialSmoothing(array $data, float $alpha): float
+    {
+        $n = count($data);
+
+        if ($n === 0) {
+            return 0;
+        }
+        if ($n === 1) {
+            return (float) $data[0];
+        }
+
+        $forecast = (float) $data[0];
+
+        for ($i = 0; $i < $n; $i++) {
+            // F_t+1 = alpha * Y_t + (1 - alpha) * F_t
+            $forecast = ($alpha * $data[$i]) + ((1 - $alpha) * $forecast);
+        }
+
+        return $forecast;
     }
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Production;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
-use App\Models\Receivable;
 use App\Models\Sale;
 use App\Models\SaleDetail;
 use Carbon\Carbon;
@@ -23,8 +22,7 @@ class ReportController extends Controller
         $periodStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
         $periodEnd = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth();
 
-        // --- 1. Rekap Penjualan (dengan detail harian dan total produksi) ---
-        // Menggabungkan data penjualan harian dengan produksi harian
+        // Rekap Penjualan
         $dailySales = Sale::select(
             DB::raw('DATE(created_at) as date'),
             DB::raw('COUNT(id) as total_transactions'),
@@ -43,30 +41,25 @@ class ReportController extends Controller
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get()
-            ->keyBy('date'); // Mengubah koleksi menjadi associative array berdasarkan tanggal
+            ->keyBy('date');
 
         $salesRecap = [];
         $grandTotalSaleTransactions = 0;
         $grandTotalRevenue = 0;
         $grandTotalProduction = 0;
 
-        // --- BAGIAN INI YANG DIMODIFIKASI ---
-        // Iterate hanya melalui tanggal-tanggal yang memiliki data penjualan
         foreach ($dailySales as $sale) {
-            $dateString = $sale->date; // Tanggal sudah dalam format YYYY-MM-DD dari query $dailySales
+            $dateString = $sale->date;
 
-            // Cari data produksi yang sesuai untuk tanggal ini
             $production = $dailyProductions->get($dateString);
 
-            // Ambil data transaksi dan pendapatan dari objek $sale
             $transactions = $sale->total_transactions;
             $revenue = $sale->total_revenue;
 
-            // Ambil data produksi, jika tidak ada, set ke 0
             $producedQuantity = $production ? $production->total_produced_quantity : 0;
 
             $salesRecap[] = [
-                'date' => Carbon::parse($dateString)->locale('id')->translatedFormat('d F Y'), // Format tanggal untuk tampilan
+                'date' => Carbon::parse($dateString)->locale('id')->translatedFormat('d F Y'),
                 'total_transactions' => $transactions,
                 'total_revenue' => $revenue,
                 'total_production' => $producedQuantity,
@@ -77,7 +70,7 @@ class ReportController extends Controller
             $grandTotalProduction += $producedQuantity;
         }
 
-        // --- 2. Detail Produk Terjual ---
+        // Detail Produk Terjual
         $grandTotalProductsSold = 0;
         $grandTotalProductionProductsSold = 0;
 
@@ -98,7 +91,7 @@ class ReportController extends Controller
             $grandTotalProductionProductsSold += $soldProduct->total_production;
         }
 
-        // --- 3. Rekap Pembelian (detail harian) ---
+        // Rekap Pembelian
         $grandTotalPurchaseTransactions = 0;
         $grandTotalExpenses = 0;
 
@@ -121,7 +114,7 @@ class ReportController extends Controller
             $grandTotalExpenses += $purchase->total_expenses;
         }
 
-        // --- 4. Detail Pembelian Bahan Baku ---        
+        // Detail Pembelian Bahan Baku    
         $detailPurchasedRawMaterials = PurchaseDetail::select(
             'materials.name as material_name',
             DB::raw('SUM(purchase_details.qty) as total_quantity_purchased')
@@ -133,11 +126,9 @@ class ReportController extends Controller
             ->orderBy('total_quantity_purchased', 'DESC')
             ->get();
 
-        // --- 5. Piutang Aktif ---
+        // Piutang Aktif
         $grandTotalAmount = 0;
-
         $activeReceivablesDetails = Sale::with(['customer', 'details.product', 'receivable'])
-            // Lakukan JOIN dengan tabel 'customers' untuk bisa mengakses kolom 'name'
             ->join('customers', 'sales.customer_id', '=', 'customers.id')
             ->whereBetween('sales.created_at', [$periodStart, $periodEnd])
             ->whereNull('sales.paid_at')
@@ -149,7 +140,7 @@ class ReportController extends Controller
                 return [
                     'customer_name' => $sale->customer->name,
                     'details' => $sale->details,
-                    'outstanding_amount' => $sale->total, // Total penjualan adalah nominal piutang jika belum lunas
+                    'outstanding_amount' => $sale->total,
                     'due_date' => Carbon::parse($sale->receivable->due_date)->locale('id')->translatedFormat('d F Y') ?? 'N/A',
                 ];
             });

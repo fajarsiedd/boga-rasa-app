@@ -1,6 +1,6 @@
 <script setup>
 import { usePage, useForm, router } from '@inertiajs/vue3';
-import { IconArrowsMaximize, IconArrowsMinimize, IconUser, IconCircleCheckFilled, IconX, IconXboxXFilled, IconReload } from '@tabler/icons-vue';
+import { IconArrowsMaximize, IconArrowsMinimize, IconUser, IconCircleCheckFilled, IconX, IconXboxXFilled, IconReload, IconSparkles } from '@tabler/icons-vue';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -159,9 +159,9 @@ const fetchData = () => {
                         <div v-if="orders.length > 0"
                             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 bg-white">
                             <div v-for="order in orders" :key="order.id"
-                                class="bg-transparent border-gray-200 flex flex-col shadow-sm rounded-md p-4">
-                                <div class="flex items-center mb-1 border-b border-gray-300 pb-2">
-                                    <div class="bg-green-100 p-1 rounded-full mr-2">
+                                class="bg-yellow-100 flex flex-col shadow-sm p-4">
+                                <div class="flex items-center mb-1 border-b border-gray-700 pb-2">
+                                    <div class="bg-yellow-200 p-1 rounded-full mr-2">
                                         <IconUser class="text-green-700" size="18" />
                                     </div>
                                     <h4 class="font-semibold text-green-700">{{ order.customer.name }}</h4>
@@ -203,13 +203,17 @@ const fetchData = () => {
                         <div
                             class="flex flex-col items-center justify-center text-center border border-gray-300 rounded-md p-2 mt-2">
                             <p class="font-semibold">Prediksi Penjualan</p>
-                            <h3 class="font-bold text-3xl">{{ Number(production.direct_sales).toFixed(1) }}</h3>
+                            <div class="relative">
+                                <h3 class="font-bold text-3xl">{{ Number(production.direct_sales).toFixed(1) }}</h3>
+                                <IconSparkles size="20"
+                                    class="text-yellow-400 animate-pulse fill-yellow-400 ml-1 absolute top-0 -right-5 z-10" />
+                            </div>
                             <p class="text-sm">(Jirangan)</p>
                         </div>
                         <div
                             class="flex flex-col items-center justify-center text-center border border-green-700 rounded-md p-2 mt-2 w-48">
                             <p class="font-semibold">{{ isFullscreen ? 'Jumlah Produksi' : 'Rekomendasi Jumlah Produksi'
-                                }}</p>
+                            }}</p>
 
                             <form v-if="isEdit" @submit.prevent="submitForm" class="w-full">
                                 <input type="number" v-model="form.total" required autofocus

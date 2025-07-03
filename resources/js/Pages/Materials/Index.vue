@@ -1,7 +1,7 @@
 <script setup>
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconReload } from '@tabler/icons-vue';
+import { IconSearch, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconReload, IconSparkles } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 
 const props = defineProps({
@@ -120,7 +120,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data bahan baku'
-                        }}
+                            }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk
                             menambahkan
@@ -149,8 +149,11 @@ const resetFilters = () => {
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Takaran/Jirangan</th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Perkiraan Stok Habis</th>
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider flex items-center whitespace-nowrap">
+                                        Perkiraan Stok Habis <span>
+                                            <IconSparkles
+                                                class="text-yellow-400 animate-pulse fill-yellow-400 ml-1" />
+                                        </span></th>
                                     <th v-if="canEdit || canDelete"></th>
                                 </tr>
                             </thead>
@@ -167,8 +170,8 @@ const resetFilters = () => {
                                         material.measure_per_jirangan ||
                                         '0'
                                     }} gr</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                        -
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                                        {{ material.estimated_depletion_date }}
                                     </td>
                                     <td v-if="canEdit || canDelete"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
