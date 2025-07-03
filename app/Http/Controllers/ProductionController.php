@@ -77,7 +77,7 @@ class ProductionController extends Controller
 
             $production->save();
 
-            return redirect()->route('produksi.index')->with('success', 'Total produksi berhasil diperbarui.');
+            return redirect()->route('produksi.index', ['date' => $production->date])->with('success', 'Total produksi berhasil diperbarui.');
         } catch (\Throwable $th) {
             return redirect()->route('produksi.index')
                 ->with('error', 'Terjadi kesalahan saat memperbarui total produksi: ' . $th->getMessage())
