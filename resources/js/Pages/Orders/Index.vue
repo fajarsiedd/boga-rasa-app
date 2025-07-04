@@ -159,7 +159,7 @@ const resetFilters = () => {
                             </div>
 
                             <div class="w-full">
-                                <label for="date" class="block text-sm font-medium text-gray-700">Tgl. Transaksi</label>
+                                <label for="date" class="block text-sm font-medium text-gray-700">Tgl. Pengambilan</label>
                                 <input type="date" v-model="form.date" @change="fetchData"
                                     class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
                             </div>

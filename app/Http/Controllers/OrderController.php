@@ -34,7 +34,7 @@ class OrderController extends Controller
         }
 
         if ($request->has('date') && $request->date != null) {
-            $ordersQuery->whereDate('created_at', $request->date);
+            $ordersQuery->whereDate('date', $request->date);
         }
 
         if ($request->has('status') && $request->status != null) {
