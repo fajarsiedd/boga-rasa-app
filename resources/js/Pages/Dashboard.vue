@@ -165,9 +165,9 @@ const pieChartOptions = computed(() => ({
                     <h3 class="text-md font-semibold text-gray-700 mb-2">Total Pembelian</h3>
                     <p class="text-2xl font-bold text-gray-700">{{
                         dashboardStats.purchases.currentPeriod.totalTransactions }}</p>
-                    <div :class="dashboardStats.purchases.transactionPercentageChange >= 0 ? 'text-green-700' : 'text-red-500'"
+                    <div :class="dashboardStats.purchases.transactionPercentageChange > 0 ? 'text-red-500' : 'text-green-700'"
                         class="flex items-center text-sm mt-2">
-                        <span v-if="dashboardStats.purchases.transactionPercentageChange >= 0">
+                        <span v-if="dashboardStats.purchases.transactionPercentageChange > 0">
                             <IconTrendingUp />
                         </span>
                         <span v-else>
@@ -182,9 +182,9 @@ const pieChartOptions = computed(() => ({
                     <h3 class="text-md font-semibold text-gray-700 mb-2">Total Pengeluaran</h3>
                     <p class="text-2xl font-bold text-gray-700">Rp{{ new
                         Intl.NumberFormat('id-ID').format(dashboardStats.totalExpenses.current) }}</p>
-                    <div :class="dashboardStats.totalExpenses.percentageChange >= 0 ? 'text-green-700' : 'text-red-500'"
+                    <div :class="dashboardStats.totalExpenses.percentageChange > 0 ? 'text-red-500' : 'text-green-700'"
                         class="flex items-center text-sm mt-2">
-                        <span v-if="dashboardStats.totalExpenses.percentageChange >= 0">
+                        <span v-if="dashboardStats.totalExpenses.percentageChange > 0">
                             <IconTrendingUp />
                         </span>
                         <span v-else>
