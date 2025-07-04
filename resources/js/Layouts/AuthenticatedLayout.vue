@@ -33,8 +33,18 @@ const isOwner = computed(() => user.value && user.value.role === 'owner');
 const isAdmin = computed(() => user.value && user.value.role === 'admin');
 const isFinance = computed(() => user.value && user.value.role === 'finance');
 const initials = computed(() => {
-    const names = user.value.name.split(' ')
-    return names.map(n => n[0]).join('').toUpperCase()
+    const names = user.value.name.split(' ');
+    let result = '';
+
+    if (names.length > 0 && names[0].length > 0) {
+        result += names[0][0];
+    }
+    
+    if (names.length > 1 && names[1].length > 0 && result.length < 2) {
+        result += names[1][0];
+    }
+    
+    return result.toUpperCase();
 });
 
 const toggleDropdown = () => {
