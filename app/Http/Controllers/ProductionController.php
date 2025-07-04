@@ -25,7 +25,7 @@ class ProductionController extends Controller
         $predictedDirectSalesJirangan = 0.0;
 
         $orders = Order::with('details.product', 'customer')->whereDate('date', $date)->get();
-        if ($date->greaterThanOrEqualTo(Carbon::today())) {            
+        if ($date->isToday() || $date->isTomorrow()) {        
             if ($orders->isNotEmpty()) {
                 foreach ($orders as $order) {
                     foreach ($order->details as $detail) {
@@ -42,12 +42,12 @@ class ProductionController extends Controller
             
             if ($predictedDirectSalesJirangan < 0) {
                 $predictedDirectSalesJirangan = 0;
-            }
+            }            
         }
 
         $production = Production::whereDate('date', $date)->first();
         if ($production) {
-            if ($date->greaterThanOrEqualTo(Carbon::today())) {
+            if ($date->isToday() || $date->isTomorrow()) {
                 $production->orders = $jiranganFromOrders;
                 $production->direct_sales = $predictedDirectSalesJirangan;
 
