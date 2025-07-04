@@ -173,7 +173,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data penjualan'
-                        }}
+                            }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol buat transaksi
                             untuk
@@ -215,10 +215,10 @@ const resetFilters = () => {
                                 <tr v-for="sale in sales" :key="sale.id">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         sale.code
-                                        }}</td>
+                                    }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         sale.customer.name
-                                        }}
+                                    }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         sale.total.toLocaleString('id-ID', {
@@ -273,7 +273,7 @@ const resetFilters = () => {
                         Transaksi</label>
                     <span class="text-gray-700 text-sm">{{ new
                         Date(selectedSale.created_at).toLocaleDateString('id-ID')
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <div>
@@ -329,11 +329,11 @@ const resetFilters = () => {
                                     }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.qty
-                                    }}
+                                }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.product.price
-                                    }}
+                                }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.subtotal.toLocaleString('id-ID', {
@@ -361,5 +361,17 @@ const resetFilters = () => {
                 </h4>
             </div>
         </div>
+
+        <template #actions>
+            <div class="flex items-center justify-end mt-2">
+                <button type="button" @click="() => showDetailDialog = false"
+                    class="px-6 py-2 outline rounded-md min-w-32 text-center hover:cursor-pointer hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 mr-4 font-semibold">
+                    Tutup</button>
+                <button type="button"
+                    class="inline-flex items-center justify-center px-6 py-2 min-w-32 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    Cetak Nota
+                </button>
+            </div>
+        </template>
     </DetailModal>
 </template>

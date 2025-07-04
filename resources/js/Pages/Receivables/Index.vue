@@ -4,6 +4,8 @@ import { computed, ref } from 'vue';
 import { IconSearch, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconChevronDown, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 import DetailModal from '../../Components/DetailModal.vue';
+import html2canvas from 'html2canvas-pro';
+import { jsPDF } from 'jspdf';
 
 const props = defineProps({
     receivables: Array,
@@ -82,6 +84,54 @@ const resetFilters = () => {
 
     router.get(route('piutang.index'), {});
 }
+
+const downloadInvoice = async () => {
+    try {
+        const element = document.getElementById('invoice-content');
+        if (!element) {
+            console.error("Elemen dengan ID 'invoice-content' tidak ditemukan.");
+            alert("Gagal membuat PDF: Konten invoice tidak ditemukan.");
+            return;
+        }
+
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: -window.scrollY,
+            width: 752,
+            windowWidth: 752
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const imgHeight = canvas.height * pdfWidth / canvas.width;
+        let heightLeft = imgHeight;
+
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft >= -50) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
+        const filename = `Tagihan_${selectedReceivable.value.sale.customer.name}_${new Date().toLocaleDateString('id-ID')}.pdf`;
+        pdf.save(filename);
+
+    } catch (error) {
+        console.error("Gagal membuat PDF:", error);
+    }
+};
 </script>
 
 <template>
@@ -195,7 +245,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data piutang'
-                            }}
+                        }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Transaksi penjualan yang
                             tercatata sebagai piutang akan ditampilkan disini.</p>
@@ -207,9 +257,9 @@ const resetFilters = () => {
                         <table class="min-w-full divide-y divide-gray-200 overflow-hidden">
                             <thead class="bg-green-50">
                                 <tr>
-                                    <th
+                                    <!-- <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Kode</th>
+                                        Kode</th> -->
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Konsumen</th>
@@ -233,12 +283,12 @@ const resetFilters = () => {
                                     'border-b border-gray-200': receivable.id != receivables[receivables.length - 1].id,
                                     'border-none': receivable.id == receivables[receivables.length - 1].id
                                 }">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
+                                    <!-- <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         receivable.sale.code
-                                    }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                    }}</td> -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         receivable.sale.customer.name
-                                    }}
+                                        }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         receivable.sale.total.toLocaleString('id-ID', {
@@ -297,7 +347,7 @@ const resetFilters = () => {
                         Transaksi</label>
                     <span class="text-gray-700 text-sm">{{ new
                         Date(selectedReceivable.sale.created_at).toLocaleDateString('id-ID')
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <div>
@@ -353,11 +403,11 @@ const resetFilters = () => {
                                     }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.qty
-                                }}
+                                    }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.product.price
-                                }}
+                                    }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.subtotal.toLocaleString('id-ID', {
@@ -385,5 +435,131 @@ const resetFilters = () => {
                 </h4>
             </div>
         </div>
+
+        <template #actions>
+            <div class="flex items-center justify-end mt-2">
+                <button type="button" @click="() => showDetailDialog = false"
+                    class="px-6 py-2 outline rounded-md min-w-32 text-center hover:cursor-pointer hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 mr-4 font-semibold">
+                    Tutup</button>
+                <button type="button" @click="downloadInvoice"
+                    class="inline-flex items-center justify-center px-6 py-2 min-w-32 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    Unduh Tagihan
+                </button>
+            </div>
+        </template>
     </DetailModal>
+
+    <!-- Invoice -->
+    <div v-if="selectedReceivable" id="invoice-content" class="invoice-offscreen w-[752px] p-8 bg-white rounded-md text-gray-700">
+        <div class="flex flex-row items-start justify-between mb-8">
+            <div class="flex flex-col items-start justify-center w-full">
+                <h2 class="text-3xl font-bold">INVOICE</h2>
+            </div>
+
+            <div class="flex justify-end w-full">
+                <img src="/public/assets/main-logo.png" alt="Default Logo" class="h-16">
+            </div>
+        </div>
+
+        <div class="flex flex-col items-start justify-center w-full">
+            <p class="font-medium">BOGA RASA</p>
+            <p class="text-sm mt-1">Jl. Terusan Suryani No. 87, Bandung, 40222</p>
+            <p class="text-sm mt-1">Telp. (022) 6040701</p>
+        </div>
+
+        <div class="flex flex-row items-start gap-4 my-8">
+            <div class="w-full">
+                <label for="customer_id" class="block text-sm font-medium text-gray-700">Tagihan Kepada:</label>
+                <div class="flex items-center mt-1 text-gray-700 text-sm">
+                    {{ selectedReceivable.sale.customer.name }}
+                </div>
+                <div class="flex items-center mt-1 text-gray-700 text-sm">
+                    {{ selectedReceivable.sale.customer.phone ?? '-' }}
+                </div>
+            </div>
+
+            <div class="w-full flex flex-row justify-end gap-4">
+                <div class="flex flex-col items-end">
+                    <label class="block text-sm font-medium text-gray-700">Tanggal Invoice:</label>
+                    <label class="block text-sm font-medium mt-1 text-gray-700">Jatuh Tempo:</label>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-gray-700 text-sm">
+                        {{ new Date().toLocaleDateString('id-ID') }}
+                    </span>
+                    <span class="text-gray-700 mt-1 text-sm">
+                        {{ new Date(selectedReceivable.due_date).toLocaleDateString('id-ID') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="space-y-4">
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                <table class="w-full">
+                    <thead class="bg-green-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                Nama Produk</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                Harga</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="detail in selectedReceivable.sale.details" :key="detail.id">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                {{
+                                    detail.product.name
+                                }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                detail.qty
+                                }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                detail.product.price
+                                }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">{{
+                                detail.subtotal.toLocaleString('id-ID', {
+                                    style: 'currency', currency: 'IDR',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                })
+                            }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-right mt-8">
+            <h4 class="text-xl font-bold text-gray-700">Total:
+                <span class="text-green-700">
+                    {{
+                        selectedReceivable.sale.total.toLocaleString('id-ID', {
+                            style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }) }}
+                </span>
+            </h4>
+        </div>
+
+        <div class="text-center text-sm text-gray-500 w-full mt-8">
+            Silakan selesaikan pembayaran sebelum tanggal jatuh tempo.<br>Terima kasih telah memesan tahu di Boga Rasa.
+        </div>
+    </div>
 </template>
+
+<style scoped>
+.invoice-offscreen {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+}
+</style>

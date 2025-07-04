@@ -39,6 +39,10 @@ const closeModal = () => {
                     <div class="px-6 pb-6 pt-4 overflow-y-auto flex-grow w-full">
                         <slot></slot>
                     </div>
+
+                    <div class="p-6 border-t border-gray-200 pt-4 flex-shrink-0 flex justify-end gap-2">
+                        <slot name="actions"></slot>
+                    </div>
                 </div>
             </div>
         </transition>

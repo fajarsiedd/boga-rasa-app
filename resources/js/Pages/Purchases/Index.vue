@@ -237,17 +237,6 @@ const resetFilters = () => {
                         {{ selectedPurchase.supplier.name }}
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nota Pembelian</label>
-                    <span v-if="!selectedPurchase.receipt_image" class="text-gray-700 text-sm">
-                        Tidak ada
-                    </span>
-                    <a v-else :href="'/storage/' + selectedPurchase.receipt_image" target="_blank"
-                        class="py-1 px-4 rounded-md text-white bg-green-700 inline-flex justify-center items-center hover:bg-green-900 hover:cursor-pointer text-sm">
-                        Lihat Nota
-                    </a>
-                </div>
             </div>
 
             <!-- Details -->
@@ -304,5 +293,17 @@ const resetFilters = () => {
                 </h4>
             </div>
         </div>
+
+        <template #actions>
+            <div class="flex items-center justify-end mt-2">
+                <button type="button" @click="() => showDetailDialog = false"
+                    class="px-6 py-2 outline rounded-md min-w-32 text-center hover:cursor-pointer hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 font-semibold">
+                    Tutup</button>
+                <a v-if="selectedPurchase.receipt_image" :href="'/storage/' + selectedPurchase.receipt_image" target="_blank"
+                    class="inline-flex items-center justify-center px-6 py-2 min-w-32 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white ml-4 hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    Lihat Nota
+                </a>
+            </div>
+        </template>
     </DetailModal>
 </template>

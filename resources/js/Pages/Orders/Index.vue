@@ -173,7 +173,7 @@ const resetFilters = () => {
                         </div>
                         <p class="font-semibold mb-2">{{
                             isFiltered ? 'Data tidak ditemukan' : 'Belum ada data pesanan'
-                        }}
+                            }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol buat transaksi
                             untuk
@@ -212,10 +212,10 @@ const resetFilters = () => {
                                 <tr v-for="order in orders" :key="order.id">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{{
                                         order.code
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         order.customer.name
-                                    }}
+                                        }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ new Date(order.date).toLocaleDateString('id-ID') }}
@@ -263,9 +263,9 @@ const resetFilters = () => {
                         Pengambilan</label>
                     <span class="text-gray-700 text-sm">{{ new
                         Date(selectedOrder.date).toLocaleDateString('id-ID')
-                    }}</span>
-                </div>       
-                
+                        }}</span>
+                </div>
+
                 <div>
                     <label for="customer_id" class="block text-sm font-medium text-gray-700">Konsumen</label>
                     <div class="flex items-center mt-1 text-gray-700 text-sm">
@@ -280,7 +280,7 @@ const resetFilters = () => {
                     <span class="text-gray-700 text-sm">
                         {{ selectedOrder.picked_at ? 'Selesai' : 'Belum Diambil' }}
                     </span>
-                </div>                
+                </div>
             </div>
 
             <!-- Details -->
@@ -306,7 +306,7 @@ const resetFilters = () => {
                                     }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                     detail.qty
-                                }}
+                                    }}
                                 </td>
                             </tr>
                         </tbody>
@@ -314,5 +314,17 @@ const resetFilters = () => {
                 </div>
             </div>
         </div>
+
+        <template #actions>
+            <div class="flex items-center justify-end mt-2">
+                <button type="button" @click="() => showDetailDialog = false"
+                    class="px-6 py-2 outline rounded-md min-w-32 text-center hover:cursor-pointer hover:bg-gray-50 text-sm outline-gray-700 text-gray-700 hover:text-gray-900 font-semibold">
+                    Tutup</button>
+                <Link v-if="!selectedOrder.picked_at" :href="route('penjualan.create', { order_id: selectedOrder.id })"
+                    class="inline-flex items-center justify-center px-4 py-2 min-w-32 ml-4 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                <span>Selesaikan Pesanan</span>
+                </Link>
+            </div>
+        </template>
     </DetailModal>
 </template>
