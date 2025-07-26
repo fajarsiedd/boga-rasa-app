@@ -40,7 +40,7 @@ const handleMaterialChange = (event) => {
                     v-model="internalDetail.material_id" @change="handleMaterialChange" required>
                     <option value="" disabled>Pilih Produk</option>
                     <option v-for="material in materials" :key="material.id" :value="material.id">
-                        {{ material.name }} (Stok: {{ material.stock }})
+                        {{ material.name }} (Stok: {{ material.stock }} gr)
                     </option>
                 </select>
                 <div class="pointer-events-none absolute flex items-center inset-y-0 right-2 text-gray-700">
@@ -55,7 +55,7 @@ const handleMaterialChange = (event) => {
 
         <!-- Kolom Kuantitas -->
         <div>
-            <label :for="`qty-${index}`" class="block text-sm font-medium text-gray-700">Jumlah <span
+            <label :for="`qty-${index}`" class="block text-sm font-medium text-gray-700">Jumlah (gr)<span
                     class="text-red-500">*</span>
             </label>
             <input :id="`qty-${index}`" type="number" min="1"

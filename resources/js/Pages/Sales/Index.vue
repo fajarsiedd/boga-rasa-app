@@ -277,7 +277,7 @@ const printReceipt = async () => {
 
                         <div v-if="showFilters"
                             class="flex flex-row items-center w-full text-gray-700 rounded-md py-2 gap-4">
-                            <div class="w-full">
+                            <!-- <div class="w-full">
                                 <label for="status" class="block text-sm font-medium text-gray-700">Status
                                     Pembayaran</label>
                                 <div class="relative w-full h-10 mt-1">
@@ -299,7 +299,7 @@ const printReceipt = async () => {
                                         <IconChevronDown size="16" />
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="w-full">
                                 <label for="date" class="block text-sm font-medium text-gray-700">Tgl. Transaksi</label>
@@ -348,9 +348,9 @@ const printReceipt = async () => {
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Tgl. Transaksi</th>
-                                    <th
+                                    <!-- <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                        Status Pembayaran</th>
+                                        Status Pembayaran</th> -->
                                     <th v-if="canEdit || canDelete || canView"></th>
                                 </tr>
                             </thead>
@@ -374,7 +374,7 @@ const printReceipt = async () => {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ new Date(sale.created_at).toLocaleDateString('id-ID') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-xs">
+                                    <!-- <td class="px-6 py-4 whitespace-nowrap text-xs">
                                         <div v-if="sale.paid_at"
                                             class="inline px-4 py-1 rounded-full bg-green-100 uppercase text-green-600 outline outline-green-600 text-center font-semibold">
                                             Lunas
@@ -383,7 +383,7 @@ const printReceipt = async () => {
                                             class="inline px-4 py-1 rounded-full bg-red-100 uppercase text-red-400 outline outline-red-400 text-center font-semibold">
                                             Ditunda
                                         </div>
-                                    </td>
+                                    </td> -->
                                     <td v-if="canEdit || canDelete || canView"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button v-if="canView"
@@ -427,13 +427,13 @@ const printReceipt = async () => {
                     </div>
                 </div>
 
-                <div>
+                <!-- <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status
                         Pembayaran</label>
                     <span class="text-gray-700 text-sm">
                         {{ selectedSale.paid_at ? 'Lunas' : 'Ditunda' }}
                     </span>
-                </div>
+                </div> -->
 
                 <div v-if="!selectedSale.paid_at">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jatuh Tempo</label>

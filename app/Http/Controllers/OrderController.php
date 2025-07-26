@@ -90,18 +90,26 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            $lastOrder = Order::orderBy('id', 'desc')->first();
-            $nextCodeNum = 1;
+            $orderDate = Carbon::parse($request->date);
+            $dateCode = $orderDate->format('dmy');
+            $prefix = 'PS';
+            $lastOrderToday = Order::where('code', 'like', $prefix . $dateCode . '%')
+                ->orderBy('code', 'desc')
+                ->first();
 
-            if ($lastOrder && $lastOrder->code) {
-                $lastCodeNum = (int) substr($lastOrder->code, 2);
-                $nextCodeNum = $lastCodeNum + 1;
+            $nextSequence = 1;
+
+            if ($lastOrderToday) {
+                $lastSequenceString = substr($lastOrderToday->code, -4);
+                $lastSequenceNum = (int) $lastSequenceString;
+                $nextSequence = $lastSequenceNum + 1;
             }
-
-            $code = 'O-' . str_pad($nextCodeNum, 4, '0', STR_PAD_LEFT);
+            
+            $sequenceCode = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+            $finalCode = $prefix . $dateCode . $sequenceCode;
 
             $order = Order::create([
-                'code' => $code,
+                'code' => $finalCode,
                 'customer_id' => $request->customer_id,
                 'date' => $request->date
             ]);
@@ -112,7 +120,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pesanan.index')->with('success', 'Pesanan ' . $code . ' berhasil ditambahkan.');
+            return redirect()->route('pesanan.index')->with('success', 'Pesanan ' . $finalCode . ' berhasil ditambahkan.');
         } catch (\Throwable $th) {
             DB::rollBack();
 

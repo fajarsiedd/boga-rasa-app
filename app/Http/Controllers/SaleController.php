@@ -38,14 +38,16 @@ class SaleController extends Controller
         if ($request->has('date') && $request->date != null) {
             $salesQuery->whereDate('created_at', $request->date);
         }
+        
+        $salesQuery->whereNotNull('paid_at');
 
-        if ($request->has('status') && $request->status != null) {
-            if ($request->status == 'lunas') {
-                $salesQuery->whereNotNull('paid_at');
-            } else if ($request->status == 'ditunda') {
-                $salesQuery->whereNull('paid_at');
-            }
-        }
+        // if ($request->has('status') && $request->status != null) {
+        //     if ($request->status == 'lunas') {
+        //         $salesQuery->whereNotNull('paid_at');
+        //     } else if ($request->status == 'ditunda') {
+        //         $salesQuery->whereNull('paid_at');
+        //     }
+        // }
 
         $sales = $salesQuery->get();
 
@@ -104,15 +106,24 @@ class SaleController extends Controller
         DB::beginTransaction();
 
         try {
-            $lastSale = Sale::orderBy('id', 'desc')->first();
-            $nextCodeNum = 1;
+            $saleDate = Carbon::now();
+            $dateCode = $saleDate->format('dmy');
+            $prefix = 'PJ';
+            $lastSaleToday = Sale::where('code', 'like', $prefix . $dateCode . '%')
+                ->orderBy('code', 'desc')
+                ->first();
 
-            if ($lastSale && $lastSale->code) {
-                $lastCodeNum = (int) substr($lastSale->code, 2);
-                $nextCodeNum = $lastCodeNum + 1;
+            $nextSequence = 1;
+
+            if ($lastSaleToday) {
+                $lastSequenceString = substr($lastSaleToday->code, -4);
+                $lastSequenceNum = (int) $lastSequenceString;
+                $nextSequence = $lastSequenceNum + 1;
             }
+            
+            $sequenceCode = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+            $finalCode = $prefix . $dateCode . $sequenceCode;
 
-            $code = 'S-' . str_pad($nextCodeNum, 4, '0', STR_PAD_LEFT);
             $total = 0;
             $saleDetails = [];
 
@@ -136,7 +147,7 @@ class SaleController extends Controller
             $paidAtValue = $request->boolean('is_paid') ? Carbon::now() : null;
 
             $sale = Sale::create([
-                'code' => $code,
+                'code' => $finalCode,
                 'customer_id' => $request->customer_id,
                 'total' => $total,
                 'paid_at' => $paidAtValue
@@ -171,7 +182,11 @@ class SaleController extends Controller
             if ($orderId) {
                 return redirect()->route('pesanan.index')->with('success', 'Pesanan ' . $order->code . ' berhasil diselesaikan.');
             } else {
-                return redirect()->route('penjualan.index')->with('success', 'Penjualan ' . $code . ' berhasil dibuat.');
+                if (!$paidAtValue) {
+                    return redirect()->route('piutang.index')->with('success', 'Penjualan ' . $finalCode . ' berhasil dicatat sebagai piutang.');
+                } else {
+                    return redirect()->route('penjualan.index')->with('success', 'Penjualan ' . $finalCode . ' berhasil dibuat.');
+                }
             }
         } catch (\Throwable $th) {
             DB::rollBack();

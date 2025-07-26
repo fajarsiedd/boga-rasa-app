@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\Purchase;
 use App\Models\Supplier;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -80,15 +81,23 @@ class PurchaseController extends Controller
         DB::beginTransaction();
 
         try {
-            $lastPurchase = Purchase::orderBy('id', 'desc')->first();
-            $nextCodeNumber = 1;
+            $purchaseDate = Carbon::now();
+            $dateCode = $purchaseDate->format('dmy');
+            $prefix = 'PB';
+            $lastPurchaseToday = Purchase::where('code', 'like', $prefix . $dateCode . '%')
+                ->orderBy('code', 'desc')
+                ->first();
 
-            if ($lastPurchase && $lastPurchase->code) {
-                $lastCodeNumber = (int) substr($lastPurchase->code, 2);
-                $nextCodeNumber = $lastCodeNumber + 1;
+            $nextSequence = 1;
+
+            if ($lastPurchaseToday) {
+                $lastSequenceString = substr($lastPurchaseToday->code, -4);
+                $lastSequenceNum = (int) $lastSequenceString;
+                $nextSequence = $lastSequenceNum + 1;
             }
-
-            $purchaseCode = 'P' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
+            
+            $sequenceCode = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
+            $finalCode = $prefix . $dateCode . $sequenceCode;
 
             $totalAmount = 0;
             $purchaseDetails = [];
@@ -118,7 +127,7 @@ class PurchaseController extends Controller
             }
 
             $purchase = Purchase::create([
-                'code' => $purchaseCode,
+                'code' => $finalCode,
                 'supplier_id' => $request->supplier_id,
                 'total' => $totalAmount,
                 'receipt_image' => $receiptImagePath,
@@ -131,7 +140,7 @@ class PurchaseController extends Controller
             DB::commit();
 
             return redirect()->route('pembelian.index')
-                ->with('success', 'Pembelian ' . $purchaseCode . ' berhasil dibuat.');
+                ->with('success', 'Pembelian ' . $finalCode . ' berhasil dibuat.');
         } catch (\Throwable $th) {
             DB::rollBack();
 

@@ -35,7 +35,7 @@ const submit = () => {
                         </div>
 
                         <div class="mb-4">
-                            <label for="stock" class="block text-sm font-medium text-gray-700">Stok
+                            <label for="stock" class="block text-sm font-medium text-gray-700">Stok (gr)
                                 <span class="text-red-500">*</span></label>
                             <input id="stock" type="number"
                                 class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
@@ -46,7 +46,7 @@ const submit = () => {
 
                         <div class="mb-4">
                             <label for="measure_per_jirangan"
-                                class="block text-sm font-medium text-gray-700">Takaran/Jirangan
+                                class="block text-sm font-medium text-gray-700">Takaran/Jirangan (gr)
                                 <span class="text-red-500">*</span></label>
                             <input id="measure_per_jirangan" type="number"
                                 class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"

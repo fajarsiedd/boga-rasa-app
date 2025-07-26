@@ -161,7 +161,7 @@ const resetFilters = () => {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         product.price }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
-                                        product.produce_per_jirangan }}</td>
+                                        product.produce_per_jirangan }} pcs/jirangan</td>
                                     <td v-if="canEdit || canDelete"
                                         class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Link v-if="canEdit" :href="route('produk.edit', product.id)"
