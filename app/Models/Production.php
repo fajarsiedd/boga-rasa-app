@@ -20,6 +20,7 @@ class Production extends Model
         'direct_sales',
         'total',
         'date',
+        'is_started',
         'is_customized'
     ];    
 }

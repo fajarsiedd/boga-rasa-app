@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Production;
@@ -25,7 +26,7 @@ class ProductionController extends Controller
         $predictedDirectSalesJirangan = 0.0;
 
         $orders = Order::with('details.product', 'customer')->whereDate('date', $date)->get();
-        if ($date->isToday() || $date->isTomorrow()) {        
+        if ($date->isToday() || $date->isTomorrow()) {
             if ($orders->isNotEmpty()) {
                 foreach ($orders as $order) {
                     foreach ($order->details as $detail) {
@@ -34,15 +35,15 @@ class ProductionController extends Controller
                 }
             }
 
-            $historicalDirectSalesJirangan = $this->getOptimizedHistoricalDirectSalesJirangan(15);            
+            $historicalDirectSalesJirangan = $this->getOptimizedHistoricalDirectSalesJirangan(15);
 
             // Prediksi
             $alpha = 0.3; // Bisa disesuaikan
             $predictedDirectSalesJirangan = $this->simpleExponentialSmoothing($historicalDirectSalesJirangan, $alpha);
-            
+
             if ($predictedDirectSalesJirangan < 0) {
                 $predictedDirectSalesJirangan = 0;
-            }            
+            }
         }
 
         $production = Production::whereDate('date', $date)->first();
@@ -92,6 +93,59 @@ class ProductionController extends Controller
                 $production->is_customized = true;
             }
 
+            if ($request->boolean('isStarted')) {
+                $production->is_started = true;
+
+                if ($request->input('date')) {
+                    $date = Carbon::parse($request->date);
+                } else {
+                    $date = Carbon::tomorrow();
+                }
+
+                $orders = Order::with('details.product')->whereDate('date', $date)->get();
+
+                $totalJiranganNeeded = 0;
+                $materialsConsumption = [];
+
+                // Add product stock
+                foreach ($orders as $order) {
+                    foreach ($order->details as $detail) {
+                        $product = $detail->product;
+
+                        if ($product) {
+                            $product->stock += $detail->qty;
+                            $product->save();
+
+                            $totalJiranganNeeded += ($detail->qty / $product->produce_per_jirangan);
+                        }
+                    }
+                }
+
+                foreach ($orders as $order) {
+                    foreach ($order->details as $detail) {
+                        $product = $detail->product;
+
+                        if ($product) {
+                            foreach ($product->ingredients as $ingredient) {
+                                $measure = $ingredient->material->measure_per_jirangan;
+                                $consumedAmount = ceil($totalJiranganNeeded) * $measure;
+
+                                $materialsConsumption[$ingredient->material_id] = ($materialsConsumption[$ingredient->material_id] ?? 0) + $consumedAmount;
+                            }
+                        }
+                    }
+                }
+
+                // Reduce material stock
+                foreach ($materialsConsumption as $materialId => $consumedAmount) {
+                    $material = Material::find($materialId);
+                    if ($material) {
+                        $material->stock -= $consumedAmount;
+                        $material->save();
+                    }
+                }
+            }
+
             $production->save();
 
             return redirect()->route('produksi.index', ['date' => $production->date])->with('success', 'Total produksi berhasil diperbarui.');
@@ -104,7 +158,7 @@ class ProductionController extends Controller
 
     private function getOptimizedHistoricalDirectSalesJirangan(int $days): array
     {
-        $historicalData = [];        
+        $historicalData = [];
         $endDate = Carbon::yesterday()->endOfDay();
         $startDate = $endDate->copy()->subDays($days - 1)->startOfDay();
 
@@ -145,17 +199,17 @@ class ProductionController extends Controller
             ->groupBy(DB::raw('DATE(orders.date)'))
             ->orderBy('order_day', 'ASC')
             ->pluck('total_jirangan_daily', 'order_day')
-            ->all();        
+            ->all();
 
         // Merge
         $currentDate = $startDate->copy();
         while ($currentDate->lessThanOrEqualTo(Carbon::yesterday()->startOfDay())) {
             $dateString = $currentDate->toDateString();
-            
-            $soldJirangan = $dailySalesJiranganMap[$dateString] ?? 0;    
-            $orderedJirangan = $dailyOrdersJiranganMap[$dateString] ?? 0;            
+
+            $soldJirangan = $dailySalesJiranganMap[$dateString] ?? 0;
+            $orderedJirangan = $dailyOrdersJiranganMap[$dateString] ?? 0;
             $dailyDirectSales = $soldJirangan - $orderedJirangan;
-            
+
             $historicalData[] = max(0.0, $dailyDirectSales);
 
             $currentDate->addDay();
@@ -167,16 +221,16 @@ class ProductionController extends Controller
     private function simpleExponentialSmoothing(array $data, float $alpha): float
     {
         $n = count($data);
-        
+
         if ($n === 0) {
             return 0;
         }
         if ($n === 1) {
             return (float) $data[0];
         }
-        
+
         $forecast = (float) $data[0];
-        
+
         for ($i = 0; $i < $n; $i++) {
             // F_t+1 = alpha * Y_t + (1 - alpha) * F_t
             $forecast = ($alpha * $data[$i]) + ((1 - $alpha) * $forecast);

@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Product extends Model
+class PurchasePlan extends Model
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
@@ -17,15 +18,18 @@ class Product extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'code',
-        'name',
-        'price',
-        'stock',
-        'produce_per_jirangan'
-    ];
+        'status',
+        'description',
+        'supplier_id'
+    ];   
 
-    public function ingredients(): HasMany
+    public function supplier(): BelongsTo
     {
-        return $this->hasMany(Ingredient::class);
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(PurchasePlanDetail::class);
     }
 }

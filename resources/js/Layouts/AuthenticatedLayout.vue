@@ -17,7 +17,8 @@ import {
     IconChecklist,
     IconCheese,
     IconCoins,
-    IconReport
+    IconReport,
+    IconCalendarStats
 } from '@tabler/icons-vue';
 import SidebarMenuItem from '@/Components/SidebarMenuItem.vue';
 
@@ -39,11 +40,11 @@ const initials = computed(() => {
     if (names.length > 0 && names[0].length > 0) {
         result += names[0][0];
     }
-    
+
     if (names.length > 1 && names[1].length > 0 && result.length < 2) {
         result += names[1][0];
     }
-    
+
     return result.toUpperCase();
 });
 
@@ -124,6 +125,11 @@ const logout = () => {
                     <!-- Pembelian -->
                     <SidebarMenuItem :href="route('pembelian.index')" text="Pembelian" :icon="IconHeartHandshake"
                         :sidebarExpanded="sidebarExpanded" :isActive="route().current('pembelian.*')" />
+
+                    <!-- Rencana Pembelian -->
+                    <SidebarMenuItem :href="route('rencana-pembelian.index')" text="Rencana Pembelian"
+                        :icon="IconCalendarStats" :sidebarExpanded="sidebarExpanded"
+                        :isActive="route().current('rencana-pembelian.*')" />
 
                     <!-- Stok Bahan Baku -->
                     <SidebarMenuItem :href="route('bahan-baku.index')" text="Stok Bahan Baku" :icon="IconCube"
@@ -207,6 +213,11 @@ const logout = () => {
                     <!-- Pembelian -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('pembelian.index')"
                         text="Pembelian" :icon="IconHeartHandshake" :isActive="route().current('pembelian.*')" />
+
+                    <!-- Rencana Pembelian -->
+                    <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen"
+                        :href="route('rencana-pembelian.index')" text="Rencana Pembelian" :icon="IconCalendarStats"
+                        :isActive="route().current('rencana-pembelian.*')" />
 
                     <!-- Bahan Baku -->
                     <SidebarMenuItem @click="() => mobileMenuOpen = !mobileMenuOpen" :href="route('bahan-baku.index')"

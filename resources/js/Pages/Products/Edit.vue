@@ -3,13 +3,16 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     product: Object,
+    materials: Array
 });
 
 const form = useForm({
     code: props.product.code,
     name: props.product.name,
     price: props.product.price,
+    stock: props.product.stock,
     produce_per_jirangan: props.product.produce_per_jirangan,
+    ingredients: props.product.ingredients.map((v) => v.material_id)
 });
 
 const submit = () => {
@@ -50,12 +53,37 @@ const submit = () => {
                         </div>
 
                         <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Bahan Baku <span
+                                    class="text-red-500">*</span></label>
+                            <div class="mt-2 space-y-2">
+                                <label v-for="material in materials" :key="material.id" class="flex items-center">
+                                    <input type="checkbox" name="ingredients[]" :value="material.id"
+                                        v-model="form.ingredients" class="rounded hover:cursor-pointer" />
+                                    <span class="ml-2 text-sm text-gray-600">{{ material.name }}</span>
+                                </label>
+                            </div>
+                            <div v-if="form.errors.ingredients" class="text-red-600 text-sm mt-1">
+                                {{ form.errors.ingredients }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label for="price" class="block text-sm font-medium text-gray-700">Harga Produk <span
                                     class="text-red-500">*</span></label>
                             <input id="price" type="number"
                                 class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
                                 v-model="form.price" required />
                             <div v-if="form.errors.price" class="text-red-600 text-sm mt-1">{{ form.errors.price }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="stock" class="block text-sm font-medium text-gray-700">Stok <span
+                                    class="text-red-500">*</span></label>
+                            <input id="stock" type="number"
+                                class="mt-1 block w-full rounded-md px-2 bg-white h-10 border border-gray-300 focus:border-none focus:outline-none focus:ring-2 focus:ring-green-700"
+                                v-model="form.stock" required />
+                            <div v-if="form.errors.stock" class="text-red-600 text-sm mt-1">{{ form.errors.stock }}
                             </div>
                         </div>
 

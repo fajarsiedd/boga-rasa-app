@@ -15,6 +15,7 @@ const props = defineProps({
 const form = useForm({
     total: props.production.total,
     date: props.filter.date,
+    isStarted: props.production.is_started,
     refresh: false
 });
 
@@ -63,6 +64,11 @@ const refreshJirangan = () => {
 const toggleEdit = () => {
     isEdit.value = !isEdit.value;
 };
+
+const startProduction = () => {
+    form.isStarted = true;
+    submitForm();
+}
 
 const submitForm = () => {
     flash.value.success = null;
@@ -146,10 +152,17 @@ const fetchData = () => {
                             <input type="date" id="date" v-model="form.date" @change="fetchData"
                                 class="block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
                         </div>
+
                         <button @click="toggleFullscreen" type="button"
                             class="bg-gray-100 text-green-700 p-2 h-10 w-10 inline-flex items-center justify-center rounded-md border border-transparent hover:cursor-pointer hover:bg-gray-200 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                             <IconArrowsMaximize v-if="!isFullscreen" size="18" />
                             <IconArrowsMinimize v-if="isFullscreen" size="18" />
+                        </button>
+
+                        <button v-if="!production.is_started" @click="startProduction" type="button"
+                            class="inline-flex items-center justify-center py-2 w-full bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150"
+                            :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                            Mulai Produksi
                         </button>
                     </div>
                 </div>
@@ -229,7 +242,7 @@ const fetchData = () => {
                                 <h3 class="font-bold text-5xl text-green-700">{{ production.total }}
                                 </h3>
                                 <p class="text-sm">(Jirangan)</p>
-                                <div v-if="!isFullscreen" class="flex flex-row gap-2">
+                                <div v-if="!isFullscreen && !production.is_started" class="flex flex-row gap-2">
                                     <button @click="toggleEdit" type="button"
                                         class="inline-flex items-center justify-center px-4 py-2 mt-4 w-full bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150"
                                         :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

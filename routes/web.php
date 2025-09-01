@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchasePlanController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SaleController;
@@ -28,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('bahan-baku', MaterialController::class);
     Route::resource('penjualan', SaleController::class);
     Route::resource('pembelian', PurchaseController::class);
+    Route::resource('rencana-pembelian', PurchasePlanController::class);
     Route::resource('pesanan', OrderController::class);
     Route::resource('piutang', ReceivableController::class);
     Route::resource('produksi', ProductionController::class);

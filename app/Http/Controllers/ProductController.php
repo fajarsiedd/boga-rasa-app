@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Material;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-
-use function PHPUnit\Framework\isEmpty;
 
 class ProductController extends Controller
 {
@@ -18,7 +17,7 @@ class ProductController extends Controller
     {
         $this->authorize('view-products');
 
-        $productsQuery = Product::orderBy('code');
+        $productsQuery = Product::with('ingredients')->orderBy('code');
 
         if ($request->has('search') && $request->search != null) {
             $searchTerm = '%' . $request->search . '%';
@@ -43,8 +42,12 @@ class ProductController extends Controller
     public function create()
     {
         $this->authorize('create-product');
+        $materials = Material::orderBy('name')->get();
 
-        return Inertia::render('Products/Create');
+        return Inertia::render('Products/Create', [
+            'title' => 'Tambah Produk Baru',
+            'materials' => $materials
+        ]);
     }
 
     /**
@@ -58,18 +61,27 @@ class ProductController extends Controller
             'code' => 'required|string|max:255|unique:products',
             'name' => 'required|string|max:255',
             'price' => 'required|integer',
+            'stock' => 'required|integer',
             'produce_per_jirangan' => 'required|integer',
+            'ingredients' => 'required|array|min:1'
         ]);
 
         DB::beginTransaction();
 
         try {
-            Product::create([
+            $product = Product::create([
                 'code' => $request->code,
                 'name' => $request->name,
+                'stock' => $request->stock,
                 'price' => $request->price,
                 'produce_per_jirangan' => $request->produce_per_jirangan,
             ]);
+
+            foreach ($request->ingredients as $materialId) {
+                $product->ingredients()->create([
+                    'material_id' => $materialId
+                ]);
+            }
 
             DB::commit();
 
@@ -98,11 +110,13 @@ class ProductController extends Controller
     {
         $this->authorize('edit-product');
 
-        $product = Product::find($id);
+        $product = Product::with('ingredients')->find($id);
+        $materials = Material::orderBy('name')->get();
 
         return Inertia::render('Products/Edit', [
             'title' => 'Edit Produk - ' . $product->name,
-            'product' => $product
+            'product' => $product,
+            'materials' => $materials
         ]);
     }
 
@@ -117,7 +131,9 @@ class ProductController extends Controller
             'code' => 'required|string|max:255|unique:products,code,' . $id,
             'name' => 'required|string|max:255',
             'price' => 'required|integer',
+            'stock' => 'required|integer',
             'produce_per_jirangan' => 'required|integer',
+            'ingredients' => 'required|array|min:1'
         ]);
 
         DB::beginTransaction();
@@ -127,7 +143,17 @@ class ProductController extends Controller
             $product->code = $request->code;
             $product->name = $request->name;
             $product->price = $request->price;
+            $product->stock = $request->stock;
             $product->produce_per_jirangan = $request->produce_per_jirangan;
+
+            $product->ingredients()->delete();
+
+            foreach ($request->ingredients as $materialId) {
+                $product->ingredients()->create([
+                    'material_id' => $materialId
+                ]);
+            }
+
             $product->save();
 
             DB::commit();
@@ -153,6 +179,7 @@ class ProductController extends Controller
 
         try {
             $product = Product::find($id);
+            $product->ingredients()->delete();
             $product->delete();
 
             DB::commit();

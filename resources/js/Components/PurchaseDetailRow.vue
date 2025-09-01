@@ -6,6 +6,10 @@ const props = defineProps({
     detail: Object,
     index: Number,
     materials: Array,
+    isPlan: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const emit = defineEmits(['update:detail', 'remove']);
@@ -29,7 +33,8 @@ const handleMaterialChange = (event) => {
 </script>
 
 <template>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+    <div :class="isPlan ? 'md:grid-cols-3' : 'md:grid-cols-4'"
+        class="grid grid-cols-1 gap-4 items-end mb-4 p-4 border border-gray-200 rounded-md bg-gray-50">
         <!-- Kolom Bahan Baku -->
         <div>
             <label :for="`material-${index}`" class="block text-sm font-medium text-gray-700">Bahan Baku <span
@@ -68,7 +73,7 @@ const handleMaterialChange = (event) => {
         </div>
 
         <!-- Kolom Subtotal (input manual) -->
-        <div>
+        <div v-if="!isPlan">
             <label :for="`subtotal-${index}`" class="block text-sm font-medium text-gray-700">Subtotal <span
                     class="text-red-500">*</span>
             </label>

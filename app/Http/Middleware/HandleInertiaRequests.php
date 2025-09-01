@@ -96,9 +96,15 @@ class HandleInertiaRequests extends Middleware
                 'delete-order' => $user->can('delete-order'),
 
                 // Receivables
-                'view-receivables' => $user->can('view-receivables'),                
+                'view-receivables' => $user->can('view-receivables'),
                 'edit-receivable' => $user->can('edit-receivable'),
                 'delete-receivable' => $user->can('delete-receivable'),
+
+                // Purchase Plans
+                'view-purchase-plans' => $user->can('view-purchase-plans'),
+                'create-purchase-plan' => $user->can('create-purchase-plan'),
+                'edit-purchase-plan' => $user->can('edit-purchase-plan'),
+                'delete-purchase-plan' => $user->can('delete-purchase-plan'),
             ];
         }
 
@@ -112,10 +118,10 @@ class HandleInertiaRequests extends Middleware
                     'role' => $user->role,
                     'can' => $abilities
                 ] : null,
-            ],            
+            ],
             'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
             ],
         ];
     }

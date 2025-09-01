@@ -187,5 +187,22 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('delete-receivable', function (User $user) {
             return in_array($user->role, ['owner', 'finance']);
         });
+
+        // Purchase Plan
+        Gate::define('view-purchase-plans', function (User $user) {
+            return in_array($user->role, ['owner', 'admin', 'finance']);
+        });
+
+        Gate::define('create-purchase-plan', function (User $user) {
+            return in_array($user->role, ['owner', 'admin']);
+        });
+
+        Gate::define('edit-purchase-plan', function (User $user) {
+            return in_array($user->role, ['owner', 'finance']);
+        });
+
+        Gate::define('delete-purchase-plan', function (User $user) {
+            return in_array($user->role, ['owner', 'admin']);
+        });
     }
 }

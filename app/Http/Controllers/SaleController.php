@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\CustomerType;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Receivable;
 use App\Models\Sale;
@@ -38,7 +39,7 @@ class SaleController extends Controller
         if ($request->has('date') && $request->date != null) {
             $salesQuery->whereDate('created_at', $request->date);
         }
-        
+
         $salesQuery->whereNotNull('paid_at');
 
         // if ($request->has('status') && $request->status != null) {
@@ -53,7 +54,7 @@ class SaleController extends Controller
 
         return Inertia::render('Sales/Index', [
             'title' => 'Daftar Transaksi Penjualan',
-            'sales' => $sales            
+            'sales' => $sales
         ]);
     }
 
@@ -120,17 +121,46 @@ class SaleController extends Controller
                 $lastSequenceNum = (int) $lastSequenceString;
                 $nextSequence = $lastSequenceNum + 1;
             }
-            
+
             $sequenceCode = str_pad($nextSequence, 4, '0', STR_PAD_LEFT);
             $finalCode = $prefix . $dateCode . $sequenceCode;
 
             $total = 0;
             $saleDetails = [];
 
+            // Check stock
+            foreach ($request->details as $detail) {
+                $productId = $detail['product_id'];
+                $qty = $detail['qty'];
+
+                $product = Product::find($productId);
+                if (!$product) {
+                    throw new \Exception("Produk dengan ID {$productId} tidak ditemukan.");
+                }
+                
+                $totalOrderedQty = OrderDetail::whereHas('order', function ($query) use ($saleDate) {
+                    $query->whereDate('date', $saleDate->toDateString());
+                    $query->whereNull('picked_at');
+                })
+                    ->where('product_id', $productId)
+                    ->sum('qty');
+
+                $availableStock = $product->stock - $totalOrderedQty;
+
+                if ($qty > $availableStock) {
+                    throw new \Exception("Stok {$product->name} tidak mencukupi untuk penjualan");
+                }
+            }
+
             foreach ($request->details as $detail) {
                 $productId = $detail['product_id'];
                 $qty = $detail['qty'];
                 $finalPrice = $detail['final_price'];
+
+                // Reduce stock
+                $product = Product::find($productId);
+                $product->stock -= $qty;
+                $product->save();
 
                 $subtotal = $qty * $finalPrice;
 

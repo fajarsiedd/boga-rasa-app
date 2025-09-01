@@ -76,8 +76,7 @@ const resetFilters = () => {
                             <span class="font-semibold">Error! </span>
                             <span class="block sm:inline">{{ flash.error }}</span>
                         </div>
-                        <button type="button" @click="() => flash.error = null"
-                            class="hover:cursor-pointer">
+                        <button type="button" @click="() => flash.error = null" class="hover:cursor-pointer">
                             <IconX class="text-gray-700" />
                         </button>
                     </div>
@@ -118,7 +117,7 @@ const resetFilters = () => {
                             <img src="/public/assets/empty-state.png" alt="" srcset="">
                         </div>
                         <p class="font-semibold mb-2">{{ isFiltered ? 'Data tidak ditemukan' : 'Belum ada data produk'
-                        }}
+                            }}
                         </p>
                         <p v-if="!isFiltered" class="text-sm text-center text-gray-500 mb-4">Klik tombol tambah untuk
                             menambahkan
@@ -145,6 +144,9 @@ const resetFilters = () => {
                                         Nama</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                        Stok</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Harga</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
@@ -158,6 +160,8 @@ const resetFilters = () => {
                                         product.code }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         product.name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
+                                        product.stock }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{
                                         product.price }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{

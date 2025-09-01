@@ -14,9 +14,9 @@ class ProductionObserver
      */
     public function created(Production $production): void
     {
-        if ($this->shouldAdjustStock($production->date)) {
-            $this->adjustMaterialStock($production->total);
-        }
+        // if ($this->shouldAdjustStock($production->date)) {
+        //     $this->adjustMaterialStock($production->total);
+        // }
     }
 
     /**
@@ -24,16 +24,16 @@ class ProductionObserver
      */
     public function updated(Production $production): void
     {
-        if ($production->isDirty('total')) {
-            $oldTotal = $production->getOriginal('total');
-            $newTotal = $production->total;
+        // if ($production->isDirty('total')) {
+        //     $oldTotal = $production->getOriginal('total');
+        //     $newTotal = $production->total;
 
-            $changeInJirangan = $newTotal - $oldTotal;
+        //     $changeInJirangan = $newTotal - $oldTotal;
 
-            if ($this->shouldAdjustStock($production->date)) {
-                $this->adjustMaterialStock($changeInJirangan);
-            }
-        }
+        //     if ($this->shouldAdjustStock($production->date)) {
+        //         $this->adjustMaterialStock($changeInJirangan);
+        //     }
+        // }
     }
 
     /**

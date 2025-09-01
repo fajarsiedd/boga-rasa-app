@@ -17,6 +17,7 @@ return new class extends Migration
             $table->float('direct_sales');
             $table->integer('total');
             $table->dateTime('date');
+            $table->boolean('is_started')->default(false);
             $table->boolean('is_customized')->default(false);
             $table->timestamps();
         });
