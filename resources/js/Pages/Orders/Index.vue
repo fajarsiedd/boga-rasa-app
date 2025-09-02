@@ -1,6 +1,6 @@
 <script setup>
 import { router, usePage, useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import { IconSearch, IconCircleCheck, IconPlus, IconCircleCheckFilled, IconX, IconXboxXFilled, IconAdjustmentsHorizontal, IconChevronDown, IconReload } from '@tabler/icons-vue';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 import DetailModal from '../../Components/DetailModal.vue';
@@ -16,6 +16,7 @@ const form = useForm({
 });
 
 const flash = computed(() => usePage().props.flash);
+const user = computed(() => usePage().props.auth.user);
 
 const canView = computed(() => usePage().props.auth.user.can['view-orders']);
 const canCreate = computed(() => usePage().props.auth.user.can['create-order']);
@@ -28,6 +29,7 @@ const showFilters = ref(false);
 const isFiltered = ref(false);
 const selectedOrder = ref(null);
 const showDetailDialog = ref(false);
+const receiptRef = ref(null);
 
 const deleteOrder = () => {
     router.delete(route('pesanan.destroy', selectedId.value), {
@@ -61,6 +63,147 @@ const resetFilters = () => {
     form.reset();
 
     router.get(route('pesanan.index'), {});
+}
+
+const printReceipt = async () => {
+    await nextTick();
+
+    if (!receiptRef.value) {
+        console.error("Elemen struk tidak ditemukan!");
+        alert("Gagal mencetak struk: Konten struk tidak ditemukan.");
+        return;
+    }
+
+    let existingFrame = document.getElementById('printReceiptIframe');
+    if (existingFrame) {
+        document.body.removeChild(existingFrame);
+    }
+
+    const printFrame = document.createElement('iframe');
+    printFrame.style.display = 'none';
+    printFrame.id = 'printReceiptIframe';
+    document.body.appendChild(printFrame);
+
+    const frameDoc = printFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.close();
+
+    const head = frameDoc.head || frameDoc.createElement('head');
+    const body = frameDoc.body || frameDoc.createElement('body');
+
+    if (!frameDoc.documentElement) {
+        frameDoc.appendChild(frameDoc.createElement('html'));
+    }
+    if (!frameDoc.documentElement.contains(head)) {
+        frameDoc.documentElement.appendChild(head);
+    }
+    if (!frameDoc.documentElement.contains(body)) {
+        frameDoc.documentElement.appendChild(body);
+    }
+
+    const title = frameDoc.createElement('title');
+    title.textContent = 'Struk Penjualan';
+    head.appendChild(title);
+
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+        const newLink = document.createElement('link');
+        newLink.rel = 'stylesheet';
+        newLink.href = link.href;
+        frameDoc.head.appendChild(newLink);
+    });
+
+    document.querySelectorAll('style').forEach(style => {
+        const newStyle = document.createElement('style');
+        newStyle.innerHTML = style.innerHTML;
+        frameDoc.head.appendChild(newStyle);
+    });
+
+    const printStyles = frameDoc.createElement('style');
+    printStyles.innerHTML = `
+        <style>
+            body {
+                margin: 0;
+                padding: 10px;
+                font-family: monospace;
+                color: #000;
+                background-color: white;
+            }
+            #receipt-content {
+                display: block !important;
+                width: 302px;
+                margin: 0 auto;
+                padding: 0;
+                box-shadow: none;
+                color: #000;
+                background-color: white;
+            }
+            .flex { display: flex !important; }
+            .justify-between { justify-content: space-between !important; }
+            .items-center { align-items: center !important; }
+            .w-1\\/2 { width: 50% !important; }
+            .w-1\\/6 { width: 16.666667% !important; }
+            .w-1\\/4 { width: 25% !important; }
+            .text-center { text-align: center !important; }
+            .text-right { text-align: right !important; }
+            .font-bold { font-weight: bold !important; }
+            .text-lg { font-size: 1.125rem; !important }
+            .text-2xl { font-size: 1.5rem; !important }
+            .uppercase { text-transform: uppercase !important; }
+            .mb-1 { margin-bottom: 0.25rem !important; }
+            .mb-2 { margin-bottom: 0.5rem !important; }
+            .mb-4 { margin-bottom: 1rem !important; }
+            .mt-2 { margin-top: 0.5rem !important; }
+            .mt-8 { margin-top: 2rem !important; }
+            .border-b { border-bottom-width: 1px !important; }
+            .border-dashed { border-style: dashed !important; }            
+            .text-sm { font-size: 0.875rem !important; }
+            .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important; }                        
+            .border-gray-500 { border-color: #6b7280 !important; } /* Atau warna yang sesuai */
+        </style>
+    `;
+    head.appendChild(printStyles);
+
+    body.innerHTML = receiptRef.value.outerHTML;
+
+    printFrame.onload = () => {
+        if (!printFrame.contentWindow) {
+            console.error("Content window is null after iframe loaded.");
+            cleanUpIframe();
+            return;
+        }
+
+        let cleanupCalled = false;
+
+        const cleanUpIframe = () => {
+            if (cleanupCalled) return;
+            cleanupCalled = true;
+
+            if (printFrame.contentWindow && printFrame.contentWindow.removeEventListener) {
+                printFrame.contentWindow.removeEventListener('afterprint', afterPrintHandler);
+            }
+
+            if (document.body.contains(printFrame)) {
+                document.body.removeChild(printFrame);
+            }
+        };
+
+        const afterPrintHandler = () => {
+            console.log('After print event fired.');
+            cleanUpIframe();
+        };
+
+        printFrame.contentWindow.addEventListener('afterprint', afterPrintHandler);
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+
+        setTimeout(() => {
+            cleanUpIframe();
+        }, 2000);
+    };
+
+    if (printFrame.contentWindow.document.readyState === 'complete') {
+        printFrame.onload();
+    }
 }
 </script>
 
@@ -159,7 +302,8 @@ const resetFilters = () => {
                             </div>
 
                             <div class="w-full">
-                                <label for="date" class="block text-sm font-medium text-gray-700">Tgl. Pengambilan</label>
+                                <label for="date" class="block text-sm font-medium text-gray-700">Tgl.
+                                    Pengambilan</label>
                                 <input type="date" v-model="form.date" @change="fetchData"
                                     class="mt-1 block w-full rounded-md text-sm px-2 border border-gray-300 bg-white h-10 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-none" />
                             </div>
@@ -324,7 +468,62 @@ const resetFilters = () => {
                     class="inline-flex items-center justify-center px-4 py-2 min-w-32 ml-4 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
                 <span>Selesaikan Pesanan</span>
                 </Link>
+                <button v-else type="button" @click="printReceipt"
+                    class="inline-flex items-center justify-center px-6 py-2 ml-4 min-w-32 bg-green-700 hover:cursor-pointer border border-transparent rounded-md font-semibold text-sm text-white hover:bg-green-800 focus:outline-none focus:border-green-800 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    Cetak Bukti Pemesanan
+                </button>
             </div>
         </template>
     </DetailModal>
+
+    <div v-if="selectedOrder" id="receipt-content" ref="receiptRef"
+        class="receipt-offscreen w-[300px] p-4 bg-white text-gray-800 text-xs font-mono">
+
+        <div class="text-center mb-4">
+            <span class="font-bold uppercase text-2xl">BOGA RASA</span><br>
+            Jl. Terusan Suryani No. 87<br>
+            Bandung, 40222<br>
+            Telp. (022) 6040701<br>
+        </div>
+
+        <div class="border-b border-dashed mb-2" />
+
+        <div class="flex justify-between mb-2">
+            <span>Kode Pesanan:</span>
+            <span>{{ selectedOrder.code }}</span>
+        </div>
+        <div class="flex justify-between mb-2">
+            <span>Tanggal:</span>
+            <span>{{ new Date(selectedOrder.date).toLocaleDateString('id-ID') }}</span>
+        </div>
+        <div class="flex justify-between mb-2">
+            <span>Kasir:</span>
+            <span>{{ user.name || 'Admin' }}</span>
+        </div>
+
+        <div class="border-b border-dashed mb-2"></div>
+
+        <div class="mb-2">
+            <div class="flex justify-between items-center font-bold mb-2">
+                <span class="w-1/2">Produk</span>
+                <span class="w-1/6 text-center">Qty</span>
+            </div>
+            <div v-for="detail in selectedOrder.details" :key="detail.id"
+                class="flex justify-between items-center mb-2">
+                <span class="w-1/2">{{ detail.product.name }}</span>
+                <span class="w-1/6 text-center">{{ detail.qty }}</span>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <p>Bawa kembali pada saat mengambil pesanan!</p>
+            <p class="mt-2">Struk tidak boleh hilang.</p>
+        </div>
+    </div>
 </template>
+
+<style scoped>
+#receipt-content {
+    display: none;
+}
+</style>
